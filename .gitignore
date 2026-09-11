@@ -1,0 +1,17 @@
+# Node dependencies & build outputs
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Python environments & cache
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+
+# Environment secrets
+.env
+*.env.local
+
+# System files
+.DS_Store
+Thumbs.db
