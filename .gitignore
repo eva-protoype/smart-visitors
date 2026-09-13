@@ -4,9 +4,13 @@ frontend/.next/
 frontend/out/
 
 # Python environments & cache
+backend/env/
 backend/venv/
-backend/__pycache__/
-backend/*.pyc
+__pycache__/
+*.py[cod]
+
+# Database files
+backend/*.db
 
 # Environment secrets
 .env
