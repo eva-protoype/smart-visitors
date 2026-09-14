@@ -91,9 +91,10 @@ IN:
 - 4 new endpoints (see §3). Disk persistence of IsolationForest via `pickle`.
 
 OUT (explicit non-goals for Step 2):
-- No JWT/RBAC enforcement, no frontend, no Postgres migration, no real LLM API call (hook left as `LLM_PROVIDER=none`; rule parser is the default so it works offline).
+- No JWT/RBAC enforcement, no Postgres migration, no real LLM API call (hook left as `LLM_PROVIDER=none`; rule parser is the default so it works offline).
 - No retraining scheduler/cron — training is on-demand `POST /ai/anomaly/train`.
-- No PII redaction beyond not echoing `aadhar_number` in Text-to-SQL outputs.
+- No PII redaction beyond not echoing `aadhar_number` in Text-to-SQL outputs (plus no Aadhar rendering in the frontend).
+- The Streamlit frontend and Docker packaging are included as companion deliverables in this PR (not non-goals).
 
 ### 2.3 Subtasks
 

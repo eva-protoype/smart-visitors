@@ -123,7 +123,11 @@ docker compose up --build
   many campus gates can scan at the same time.
 - **SQLite** for local development because it is one file, zero setup.
   Production can swap `DB_CONNECTION` to Postgres without changing the code
-  shape (SQLAlchemy handles both).
+  shape (SQLAlchemy handles both) — with one exception: the Ask AI date
+  filters use SQLite `date()` functions (`text2sql.py`), so date-scoped
+  questions need dialect handling before a Postgres move. In Docker the SQLite
+  file lives at `./data/smart_visitors.db`, persisted in the `backend-db`
+  named volume so recreating the container keeps users, passes, and logs.
 - **Streamlit** because the UI is mostly forms + tables. No JavaScript
   framework is needed.
 - **scikit-learn only for one model** (`IsolationForest`). Everything else is
@@ -398,6 +402,11 @@ Example: a 2 AM denied scan with nothing else:
    (default `./artifacts/`, persisted via the `backend-data` Docker volume).
 4. If scikit-learn is missing, it degrades to `"model": "rules"` instead of
    crashing.
+5. Every rules fallback (too few rows, or sklearn missing) deletes a
+   previously saved pickle, so a reset database can never be scored with a
+   stale model trained on older, deleted history. Sibling-log lookups run as
+   one batched query per train/score call (`pass_id` is indexed), not one
+   query per row.
 
 Scoring (`score_log_row()` + `_score_with_bundle()`):
 
@@ -432,8 +441,10 @@ question -> build_query() (regex match) -> validate_sql() -> db.execute(text(sql
    [today|yesterday|last N days] [at GATE]”
 5. **Recent logs** — “show|list|last|recent [N] [denied|approved] scans”
    `... ORDER BY scan_time DESC LIMIT :limit_0`
-6. **Expiring passes** — contains “expiring/expire/valid until”
-   active passes `ORDER BY valid_until ASC`.
+6. **Expiring / expired passes** — “expiring / expire / valid until” lists
+   active passes `ORDER BY valid_until ASC`; “expired” lists expired passes
+   newest-expiry-first. Word boundaries keep the two apart, and “how many
+   passes are expiring?” routes to the listing instead of the total count.
 
 Anything else -> HTTP 400 with an example question. It never passes raw user
 text to SQL.
@@ -455,11 +466,14 @@ text to SQL.
    plus `--` and `;` (no statement chaining).
 3. Every `FROM/JOIN` table must be in `ALLOWED_TABLES`
    (`access_logs, passes, users`).
-4. The string `aadhar` anywhere rejects the query (Aadhar is not even in
+4. Projected columns are checked against `ALLOWED_COLUMNS`, and `SELECT *` is
+   rejected outright (`COUNT(*)` stays allowed) — so even a future LLM hook
+   cannot leak `users.aadhar_number` through a wildcard.
+5. The string `aadhar` anywhere rejects the query (Aadhar is not even in
    `ALLOWED_COLUMNS`).
-5. Limit is always clamped: `min(request.limit, AI_MAX_QUERY_ROWS=50)`.
-6. All values are bound parameters (`:name`), never pasted into the SQL string.
-7. Execution uses the request-scoped read session; no commit happens.
+6. Limit is always clamped: `min(request.limit, AI_MAX_QUERY_ROWS=50)`.
+7. All values are bound parameters (`:name`), never pasted into the SQL string.
+8. Execution uses the request-scoped read session; no commit happens.
 
 **Response shape** (`NLQueryResponse`): `{sql, params, columns, rows, answer,
 warnings}`. SQL is echoed so anyone can audit it. `answer` is a one-liner like

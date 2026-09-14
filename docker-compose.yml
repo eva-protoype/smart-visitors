@@ -5,10 +5,13 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_CONNECTION=sqlite:///./smart_visitors.db
+      - DB_CONNECTION=sqlite:///./data/smart_visitors.db
       - AI_ARTIFACT_DIR=./artifacts
     volumes:
       - backend-data:/app/artifacts
+      # Persist the SQLite file itself — without this, recreating the
+      # backend container loses users, passes, and the audit log.
+      - backend-db:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/openapi.json')"]
@@ -26,8 +29,9 @@ services:
       - BACKEND_URL=http://backend:8000
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
   backend-data:
+  backend-db:
