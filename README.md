@@ -18,7 +18,7 @@ Think of it as a **digital visitor book + security pass system** for offices, ap
 2. **The visitor gets a QR pass.** This is like a movie ticket — it has an expiry time and works only for that visit. It cannot be reused after entry or after it expires.
 3. **The guard scans it at the gate.** The guard just scans the QR. The screen instantly says **Allowed** or **Denied**, with a reason like "already used" or "expired".
 4. **Everything is written down automatically.** Who came, which gate, at what time, and whether entry was allowed — all saved. Nobody can erase or fake it later like a paper book.
-5. **Different people see different things.** Visitors, hosts, guards, and managers (admins) each have their own role, so a guard cannot create fake hosts, and a visitor cannot approve other visitors.
+5. **Different people have different roles in the data model.** Visitors, hosts, guards, and managers (admins) are labeled with a role, but route-level permissions are not enforced yet — that arrives with JWT auth in Phase 3.
 
 ### What does the "smart" AI part do? (in detail)
 
@@ -66,7 +66,7 @@ There are two AI helpers. Both are *advisors* — they never open gates by thems
 
 ### System overview
 
-FastAPI backend + SQLAlchemy (SQLite locally, Postgres in prod). Three core tables: `users`, `passes`, `access_logs`. No frontend or auth yet — APIs are called directly.
+FastAPI backend + SQLAlchemy (SQLite locally, Postgres in prod). Three core tables: `users`, `passes`, `access_logs`. A Streamlit UI (`frontend/app.py`, via Docker Compose) covers users, passes, gate scans, anomaly flags, and plain-English queries. No auth yet — role-based route enforcement is still to come.
 
 ### Phase 1 (MVP) — what exists
 

@@ -183,7 +183,9 @@ elif page == "Users":
                 else:
                     st.success(f"User created: {data.get('username')} ({data.get('role')})")
                     st.code(f"user id (use as host_user_id): {data.get('id')}", language="text")
-                    st.json(data)
+                    # Never render aadhar_number: the create response echoes
+                    # the full user row, which includes that PII field.
+                    st.json({k: v for k, v in data.items() if k != "aadhar_number"})
     with col_h:
         st.subheader("Headcount by role")
         if st.button("Refresh headcount"):
@@ -207,8 +209,9 @@ elif page == "Passes":
             visitor_name = st.text_input("Visitor name", placeholder="Ravi Kumar")
             visitor_email = st.text_input("Visitor email", placeholder="ravi@example.com")
             host_id = st.text_input("Host user id", placeholder="paste id from Users page")
-            d = st.date_input("Valid until (date)", value=date.today() + timedelta(days=1))
-            t = st.time_input("Valid until (time)", value=time(18, 0))
+            d = st.date_input("Valid until (date, UTC)", value=date.today() + timedelta(days=1))
+            t = st.time_input("Valid until (time, UTC)", value=time(18, 0))
+            st.caption("Times are stored as UTC — the backend compares them against its UTC clock for expiry and off-hours flags.")
             submitted = st.form_submit_button("Issue pass", type="primary")
         if submitted:
             if not visitor_name or not visitor_email or not host_id:

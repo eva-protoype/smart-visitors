@@ -42,10 +42,27 @@ def get_gate_freq(db: Session) -> dict[str, float]:
     return {gate: count / total for gate, count in counts.items()}
 
 
+def _group_by_pass(
+    logs: list[AccessLogModel],
+) -> dict[str, list[AccessLogModel]]:
+    """Group logs by pass_id so batch callers issue one query, not one per row."""
+    grouped: dict[str, list[AccessLogModel]] = {}
+    for log in logs:
+        grouped.setdefault(log.pass_id, []).append(log)
+    return grouped
+
+
 def extract_features(
-    log: AccessLogModel, db: Session, gate_freq: dict[str, float]
+    log: AccessLogModel,
+    db: Session,
+    gate_freq: dict[str, float],
+    siblings: list[AccessLogModel] | None = None,
 ) -> tuple[list[float], list[str]]:
-    """Build the 7-dim feature vector + human reasons for one log row."""
+    """Build the 7-dim feature vector + human reasons for one log row.
+
+    Pass pre-fetched ``siblings`` (same-pass logs) from batch callers to avoid
+    one query per row; falls back to a single query for one-off scoring.
+    """
     scan_time = log.scan_time or datetime.datetime.utcnow()
     hour = float(scan_time.hour)
     off_hours = is_off_hours(scan_time)
@@ -58,14 +75,15 @@ def extract_features(
     velocity = 0
     hopping_set: set[str] = {gate_id}
     recent_denied = 0
-    try:
-        siblings = (
-            db.query(AccessLogModel)
-            .filter(AccessLogModel.pass_id == log.pass_id)
-            .all()
-        )
-    except Exception:
-        siblings = [log]
+    if siblings is None:
+        try:
+            siblings = (
+                db.query(AccessLogModel)
+                .filter(AccessLogModel.pass_id == log.pass_id)
+                .all()
+            )
+        except Exception:
+            siblings = [log]
     for sib in siblings:
         sib_time = sib.scan_time or scan_time
         if hours_between(sib_time, scan_time) <= 1.0:
@@ -130,6 +148,18 @@ def _try_import_forest():
         return None
 
 
+def _drop_stale_artifact() -> None:
+    """Remove a previously trained model so rules fallback is never shadowed.
+
+    When the database is reset (or shrinks below MIN_TRAIN_SAMPLES), the old
+    pickle would otherwise keep scoring new data with obsolete history.
+    """
+    try:
+        os.remove(artifact_path())
+    except OSError:
+        pass
+
+
 def train_model(db: Session) -> dict:
     """Fit IsolationForest on all access_logs; fall back to rules when data is thin."""
     logs = db.query(AccessLogModel).order_by(AccessLogModel.scan_time.asc()).all()
@@ -138,6 +168,7 @@ def train_model(db: Session) -> dict:
     contamination = float(settings.ANOMALY_CONTAMINATION)
 
     if n < MIN_TRAIN_SAMPLES:
+        _drop_stale_artifact()
         return {
             "model": "rules",
             "n_samples": n,
@@ -148,11 +179,15 @@ def train_model(db: Session) -> dict:
 
     import numpy as np
 
-    X = [extract_features(log, db, gate_freq)[0] for log in logs]
+    # One in-memory grouping: each row reuses its pass's logs instead of
+    # re-querying siblings per row (identical values, O(n) queries saved).
+    by_pass = _group_by_pass(logs)
+    X = [extract_features(log, db, gate_freq, by_pass[log.pass_id])[0] for log in logs]
     arr = np.array(X, dtype=float)
 
     forest_cls = _try_import_forest()
     if forest_cls is None:  # sklearn missing -> rules mode, still a valid 200
+        _drop_stale_artifact()
         return {
             "model": "rules",
             "n_samples": n,
@@ -217,9 +252,14 @@ def _score_with_bundle(
     return s, s <= RULE_SUSPICIOUS_THRESHOLD, "rules"
 
 
-def score_log_row(log: AccessLogModel, db: Session, bundle: dict | None) -> dict:
+def score_log_row(
+    log: AccessLogModel,
+    db: Session,
+    bundle: dict | None,
+    siblings: list[AccessLogModel] | None = None,
+) -> dict:
     gate_freq = (bundle or {}).get("gate_freq") or get_gate_freq(db)
-    features, reasons = extract_features(log, db, gate_freq)
+    features, reasons = extract_features(log, db, gate_freq, siblings)
     score, suspicious, model_name = _score_with_bundle(features, bundle)
     # If the ML model says normal but strong rules fire, surface reasons anyway
     # (keeps day-0 interpretability while ML calibrates).
@@ -249,7 +289,21 @@ def score_recent(db: Session, limit: int = 20, only_suspicious: bool = False) ->
         .limit(limit)
         .all()
     )
-    flags = [score_log_row(log, db, bundle) for log in logs]
+    # One query for the full history of every pass in this batch (not just the
+    # window): same sibling values as per-row queries, up to 200 queries saved.
+    try:
+        batch = (
+            db.query(AccessLogModel)
+            .filter(AccessLogModel.pass_id.in_([log.pass_id for log in logs]))
+            .all()
+        )
+    except Exception:
+        batch = list(logs)
+    by_pass = _group_by_pass(batch)
+    flags = [
+        score_log_row(log, db, bundle, by_pass.get(log.pass_id, [log]))
+        for log in logs
+    ]
     model_name = bundle is not None and "isolation_forest" or "rules"
     # If any flag used the forest, report forest; else rules.
     used_forest = any(f.pop("model") == "isolation_forest" for f in flags)

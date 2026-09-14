@@ -37,7 +37,8 @@ class AccessLogModel(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
 
-    pass_id = Column(String, ForeignKey("passes.id"), nullable=False)
+    # Indexed: anomaly scoring looks up all sibling logs of a pass.
+    pass_id = Column(String, ForeignKey("passes.id"), nullable=False, index=True)
 
     gate_id = Column(String, default="Main Gate") # Where they checked in[cite: 1]
 

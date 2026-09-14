@@ -37,6 +37,10 @@ _ROLE_MAP = {
 
 _PASS_STATUSES = ("active", "used", "expired", "revoked")
 
+# Word-boundary match for expiry questions. \bexpires?\b matches "expire" /
+# "expires" but NOT "expired" (handled by its own branch below).
+_EXPIRY_RE = re.compile(r"\bexpiring\b|\bexpires?\b|valid until")
+
 
 def _find_gate(question: str) -> str | None:
     q = question.lower()
@@ -94,6 +98,20 @@ def validate_sql(sql: str) -> None:
     for t in tables:
         if t not in ALLOWED_TABLES:
             raise HTTPException(status_code=400, detail=f"Table not allowed: {t}")
+    # Projected columns must be allowlisted too: SELECT * would silently
+    # return users.aadhar_number. COUNT(*) stays allowed (an aggregate).
+    select_part = s.split("from", 1)[0]
+    select_sparse = re.sub(r"\bcount\s*\(\s*\*\s*\)", "", select_part)
+    if "*" in select_sparse:
+        raise HTTPException(status_code=400, detail="Wildcard SELECT is not allowed")
+    allowed_cols = {c for cols in ALLOWED_COLUMNS.values() for c in cols}
+    projected = re.sub(r"\bas\s+[a-z_][a-z0-9_]*", "", select_sparse)
+    skip = {"select", "distinct", "all", "count", "as", "asc", "desc"}
+    for ident in re.findall(r"[a-z_][a-z0-9_]*", projected):
+        if ident in skip:
+            continue
+        if ident not in allowed_cols:
+            raise HTTPException(status_code=400, detail=f"Column not allowed: {ident}")
     if "aadhar" in s:
         raise HTTPException(status_code=400, detail="aadhar_number is never queryable")
 
@@ -140,7 +158,7 @@ def build_query(question: str, limit: int | None = 20) -> tuple[str, dict, list[
                 ["count"],
                 f"{status} passes",
             )
-    if re.search(r"how many\s+passes?", q):
+    if re.search(r"how many\s+passes?", q) and not _EXPIRY_RE.search(q):
         return (
             "SELECT COUNT(*) AS count FROM passes LIMIT 1",
             {},
@@ -206,8 +224,17 @@ def build_query(question: str, limit: int | None = 20) -> tuple[str, dict, list[
             scope,
         )
 
-    # 6. Expiring passes: "passes expiring ..." / "valid until ..."
-    if "expiring" in q or "valid until" in q or "expire" in q:
+    # 6. Expired vs expiring passes. Word boundaries matter: "expired" must
+    # not match the expiring logic (and vice versa).
+    if re.search(r"\bexpired\b", q):
+        return (
+            "SELECT id, visitor_name, visitor_email, status, valid_until FROM passes"
+            " WHERE status = 'expired' ORDER BY valid_until DESC LIMIT :limit_0",
+            {"limit_0": lim},
+            ["id", "visitor_name", "visitor_email", "status", "valid_until"],
+            "expired passes",
+        )
+    if _EXPIRY_RE.search(q):
         return (
             "SELECT id, visitor_name, visitor_email, status, valid_until FROM passes"
             " WHERE status = 'active' ORDER BY valid_until ASC LIMIT :limit_0",
