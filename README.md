@@ -127,7 +127,7 @@ Typical flow: `create user (host) → create pass → scan qr_token → read {ac
 
 ##  Tech Stack
 
-* **Core Framework:** [FastAPI](https://fastapi.tiangolo.com/) (Python 3.11+) for high-concurrency, asynchronous API routes[cite: 1].
+* **Core Framework:** Go (`backend/main.go`, chi router, `modernc.org/sqlite`) for high-concurrency API routes. Legacy FastAPI code kept in `backend/legacy-src/` + `backend/legacy-main.py` for reference only. Python kept solely for the IsolationForest helper (`backend/ml/isolation.py`).
 * **Database & ORM:** SQLite (dev) / PostgreSQL (prod) with SQLAlchemy[cite: 1].
 * **Data Validation:** Pydantic v2 for strict type checking and request payload validation[cite: 1].
 * **Machine Learning (WIP):** `scikit-learn` for anomaly detection & LLM integration for Text-to-SQL analytics.

@@ -11,6 +11,9 @@ __pycache__/
 
 # Database files
 backend/*.db
+backend/data/*.db
+backend/*.db-journal
+backend/data/*.db-journal
 
 # ML artifacts (Step 2 IsolationForest pickle)
 backend/artifacts/
