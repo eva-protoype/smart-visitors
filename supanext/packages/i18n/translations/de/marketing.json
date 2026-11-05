@@ -1,0 +1,148 @@
+{
+	"blog": {
+		"description": "In diesem Blog schreibe ich über alles mögliche.",
+		"title": "Mein toller Blog",
+		"back": "Zurück zum Blog"
+	},
+	"changelog": {
+		"description": "Bleibe über die neuesten Änderungen in unserem Produkt auf dem Laufenden.",
+		"title": "Changelog"
+	},
+	"contact": {
+		"description": "Wir sind hier, um dir zu helfen. Bitte verwende das untenstehende Formular, um mit uns in Kontakt zu treten.",
+		"form": {
+			"email": "E-Mail",
+			"message": "Nachricht",
+			"name": "Name",
+			"notifications": {
+				"error": "Es tut uns leid, aber wir konnten deine Nachricht nicht senden. Bitte versuche es später noch einmal.",
+				"success": "Deine Nachricht wurde erfolgreich abgeschickt. Wir werden uns so schnell wie möglich bei dir melden."
+			},
+			"submit": "Nachricht senden"
+		},
+		"title": "Kontakt"
+	},
+	"documentation": {
+		"title": "Dokumentation"
+	},
+	"faq": {
+		"description": "Hast du irgendwelche Fragen? \nWir sind für dich da.",
+		"title": "Häufig gestellte Fragen",
+		"items": {
+			"refundPolicy": {
+				"question": "Wie ist die Rückerstattungsrichtlinie?",
+				"answer": "Wir bieten eine 30-tägige Geld-zurück-Garantie, wenn du mit unserem Produkt nicht zufrieden bist."
+			},
+			"cancelSubscription": {
+				"question": "Wie kann ich mein Abonnement kündigen?",
+				"answer": "Du kannst dein Abonnement auf der Rechnungsseite kündigen."
+			},
+			"changePlan": {
+				"question": "Kann ich meinen Plan ändern?",
+				"answer": "Ja, du kannst deinen Plan jederzeit auf der Rechnungsseite ändern."
+			},
+			"freeTrial": {
+				"question": "Bietet ihr eine kostenlose Testversion an?",
+				"answer": "Ja, wir bieten eine 14-tägige kostenlose Testversion an."
+			}
+		}
+	},
+	"home": {
+		"hero": {
+			"new": "Neu:",
+			"featureBadge": "Tolle Funktion deines SaaS",
+			"title": "Dein revolutionäres SaaS mit Next.js",
+			"subtitle": "Dies ist eine Demo-Anwendung, die mit supastarter erstellt wurde. Sie spart dir viel Zeit und Aufwand beim Aufbau deiner nächsten SaaS.",
+			"getStarted": "Loslegen",
+			"documentation": "Dokumentation",
+			"imageAlt": "Unsere Anwendung",
+			"builtWith": "Erstellt & ausgeliefert mit diesen tollen Tools"
+		},
+		"features": {
+			"badge": "Unglaubliche Funktionen",
+			"title": "Funktionen, die deine Kunden lieben werden",
+			"description": "In diesem Abschnitt kannst du alle Funktionen deines SaaS präsentieren und zeigen, wie sie deinen Kunden zugute kommen.",
+			"feature1": {
+				"title": "Funktion 1",
+				"subtitle": "Erledige mehr mit unserem tollen SaaS.",
+				"description": "Dies ist eine brillante Funktion. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext.",
+				"benefit1": {
+					"title": "Vorteil 1",
+					"description": "Dies ist ein toller Vorteil. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext."
+				},
+				"benefit2": {
+					"title": "Vorteil 2",
+					"description": "Dies ist ein toller Vorteil. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext."
+				},
+				"benefit3": {
+					"title": "Vorteil 3",
+					"description": "Dies ist ein toller Vorteil. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext."
+				}
+			},
+			"feature2": {
+				"title": "Funktion 2",
+				"subtitle": "Dein SaaS kann auch das.",
+				"description": "Ein weiterer Platzhaltertext für eine weitere Funktion.",
+				"benefit1": {
+					"title": "Vorteil 1",
+					"description": "Dies ist ein toller Vorteil. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext."
+				},
+				"benefit2": {
+					"title": "Vorteil 2",
+					"description": "Dies ist ein toller Vorteil. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext."
+				},
+				"benefit3": {
+					"title": "Vorteil 3",
+					"description": "Dies ist ein toller Vorteil. Unten siehst du einige Gründe warum. Dies ist im Grunde nur ein Platzhaltertext."
+				}
+			}
+		}
+	},
+	"newsletter": {
+		"email": "Email",
+		"hints": {
+			"error": {
+				"message": "Der Newsletter konnte nicht abonniert werden. Bitte versuche es später noch einmal."
+			},
+			"success": {
+				"message": "Danke, dass du unseren Newsletter abonniert hast. \nWir werden dich auf dem Laufenden halten.",
+				"title": "Erfolgreich angemeldet!"
+			}
+		},
+		"submit": "Abonnieren",
+		"subtitle": "Gehöre zu den Ersten, die Zugriff auf supastarter.nextjs erhalten.",
+		"title": "Erhalte frühen Zugang"
+	},
+	"notFound": {
+		"code": "404",
+		"title": "Seite nicht gefunden",
+		"goToDashboard": "Zum Dashboard gehen"
+	},
+	"common": {
+		"footer": {
+			"blog": "Blog",
+			"features": "Funktionen",
+			"pricing": "Preise",
+			"privacyPolicy": "Datenschutz",
+			"termsAndConditions": "Allgemeine Geschäftsbedingungen",
+			"builtWith": "Erstellt mit supastarter"
+		},
+		"menu": {
+			"blog": "Blog",
+			"changelog": "Changelog",
+			"contact": "Kontakt",
+			"dashboard": "Dashboard",
+			"docs": "Dokumentation",
+			"faq": "FAQ",
+			"login": "Anmelden",
+			"pricing": "Preise"
+		},
+		"aria": {
+			"menu": "Menü",
+			"language": "Sprache"
+		},
+		"tableOfContents": {
+			"title": "Auf dieser Seite"
+		}
+	}
+}

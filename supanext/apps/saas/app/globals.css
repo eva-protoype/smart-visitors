@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@import "@repo/tailwind-config/theme.css";
+@import "@repo/tailwind-config/tailwind-animate.css";
+
+@source "../../../packages/ui/components";
+@source "../node_modules/streamdown/dist/*.js";
+
+@variant dark (&:where(.dark, .dark *));
+
+
+@utility container {
+	margin-inline: auto;
+	padding-inline: 1.5rem;
+	width: 100%;
+	max-width: var(--container-7xl);
+}
+
+@utility no-scrollbar {
+	&::-webkit-scrollbar {
+		display: none;
+	}
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--border);
+	}
+
+	body {
+		letter-spacing: -0.01em;
+	}
+
+	svg.lucide {
+		stroke-width: 1.75;
+	}
+}

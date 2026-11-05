@@ -1,0 +1,41 @@
+{
+	"dependencies": {
+		"@repo/i18n": "workspace:*",
+		"@orpc/client": "catalog:",
+		"@orpc/json-schema": "catalog:",
+		"@orpc/openapi": "catalog:",
+		"@orpc/server": "catalog:",
+		"@orpc/zod": "catalog:",
+		"@repo/ai": "workspace:*",
+		"@repo/auth": "workspace:*",
+		"@repo/database": "workspace:*",
+		"@repo/logs": "workspace:*",
+		"@repo/mail": "workspace:*",
+		"@repo/payments": "workspace:*",
+		"@repo/storage": "workspace:*",
+		"@repo/utils": "workspace:*",
+		"@scalar/hono-api-reference": "^0.10.4",
+		"@sindresorhus/slugify": "catalog:",
+		"cookie": "catalog:",
+		"hono": "catalog:",
+		"nanoid": "catalog:",
+		"openai": "catalog:",
+		"openapi-merge": "^1.3.3",
+		"use-intl": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@repo/tsconfig": "workspace:*",
+		"@types/react": "catalog:",
+		"encoding": "^0.1.13",
+		"typescript": "catalog:"
+	},
+	"main": "./index.ts",
+	"name": "@repo/api",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"type-check": "tsc --noEmit"
+	},
+	"version": "0.0.0"
+}

@@ -34,6 +34,95 @@ st.set_page_config(
 )
 
 
+def apply_ui_theme() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+            --bg: #f5f7f4;
+            --panel: #ffffff;
+            --panel-strong: #ffffff;
+            --line: #e3e9e3;
+            --text: #29372f;
+            --muted: #748176;
+            --brand: #638672;
+            --brand-2: #92ae9a;
+            --accent: #c28b4d;
+            --danger: #c76e68;
+        }
+        .stApp {
+            background: var(--bg);
+            color: var(--text);
+        }
+        .block-container {
+            padding-top: 1.5rem;
+            padding-bottom: 2rem;
+            max-width: 1400px;
+        }
+        div[data-testid="stSidebar"] {
+            background: #eef2ed;
+            border-right: 1px solid var(--line);
+        }
+        .stSidebar .stSelectbox, .stSidebar .stTextInput, .stSidebar .stRadio {
+            background: #f8faf7;
+            border-radius: 0.75rem;
+        }
+        .stMetric {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 0.9rem 1rem;
+            box-shadow: 0 8px 24px rgba(43, 62, 49, 0.05);
+        }
+        .stMetric [data-testid="stMetricValue"] {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .stButton > button {
+            border-radius: 0.8rem;
+            border: 1px solid #d5e0d7;
+            background: #e8f0e9;
+            color: #355342;
+            font-weight: 600;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .stButton > button:hover {
+            transform: translateY(-1px);
+            background: #dce9de;
+            box-shadow: 0 8px 18px rgba(43, 62, 49, 0.08);
+        }
+        .stDataFrame {
+            border: 1px solid var(--line);
+            border-radius: 0.9rem;
+            overflow: hidden;
+        }
+        .stCode {
+            border-radius: 0.75rem;
+            border: 1px solid var(--line);
+        }
+        .glass {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 1rem 1.1rem;
+            box-shadow: 0 8px 24px rgba(43, 62, 49, 0.05);
+            margin-bottom: 1rem;
+        }
+        h1, h2, h3, h4 {
+            letter-spacing: -0.03em;
+        }
+        [data-testid="stHeader"] {
+            background: transparent;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+apply_ui_theme()
+
+
 # ---------------------------------------------------------------- helpers
 def api_url(path: str) -> str:
     base = st.session_state.get("backend_url", BACKEND_URL).rstrip("/")
@@ -108,10 +197,9 @@ with st.sidebar:
 
 # ---------------------------------------------------------------- Dashboard
 if page == "Dashboard":
-    st.header("Dashboard")
+    st.header("Visitor overview")
     st.write(
-        "Digital visitor book: hosts issue time-limited QR passes, guards scan them at the gate, "
-        "and managers audit entries, suspicious flags, and plain-English questions."
+        "A clear view of today's visitors, pass activity, and gate security."
     )
     c1, c2, c3 = st.columns(3)
     with c1:

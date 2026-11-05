@@ -1,0 +1,33 @@
+{
+	"common": {
+		"openLinkInBrowser": "Si deseas abrir el enlace en un navegador diferente al predeterminado, copia y pega este enlace:",
+		"otp": "Contraseña de un solo uso",
+		"useLink": "o usa el siguiente enlace:"
+	},
+	"emailVerification": {
+		"body": "Hola,\npor favor haz clic en el enlace de abajo para verificar esta nueva dirección de correo electrónico.",
+		"confirmEmail": "Verificar correo",
+		"subject": "Verifica tu correo electrónico"
+	},
+	"forgotPassword": {
+		"body": "Hola,\nsolicitaste un restablecimiento de contraseña.\n\nHaz clic en el botón de abajo para restablecer tu contraseña.",
+		"resetPassword": "Restablecer contraseña",
+		"subject": "Restablece tu contraseña"
+	},
+	"magicLink": {
+		"body": "Hola,\nsolicitaste un correo de inicio de sesión de supastarter.\n\nHaz clic en el enlace de abajo para iniciar sesión.",
+		"login": "Iniciar sesión",
+		"subject": "Iniciar sesión en supastarter"
+	},
+	"newUser": {
+		"body": "Hola,\ngracias por registrarte en supastarter.\n\nPara comenzar a usar nuestra aplicación, por favor confirma tu dirección de correo electrónico haciendo clic en el enlace de abajo.",
+		"confirmEmail": "Confirmar correo",
+		"subject": "Confirma tu correo electrónico"
+	},
+	"organizationInvitation": {
+		"body": "Has sido invitado a unirte a la organización {organizationName}. Haz clic en el botón de abajo o copia y pega el enlace en tu navegador preferido para aceptar la invitación y unirte a la organización.",
+		"headline": "Únete a la organización {organizationName}",
+		"join": "Unirse a la organización",
+		"subject": "Has sido invitado a unirte a una organización"
+	}
+}

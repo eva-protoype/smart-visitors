@@ -1,0 +1,61 @@
+{
+	"pricing": {
+		"choosePlan": "Choisir un forfait",
+		"contactSales": "Contacter les ventes",
+		"description": "Choisissez le forfait qui vous convient le mieux.",
+		"getStarted": "Commencer",
+		"month": "{count, plural, one {mois} other {{count} mois}}",
+		"monthly": "Mensuel",
+		"products": {
+			"basic": {
+				"description": "Parfait pour les petites équipes.",
+				"features": {
+					"anotherFeature": "Une autre fonctionnalité incroyable",
+					"limitedSupport": "Support limité"
+				},
+				"title": "Basique"
+			},
+			"enterprise": {
+				"description": "Forfait personnalisé adapté à vos besoins",
+				"features": {
+					"enterpriseSupport": "Support entreprise",
+					"unlimitedProjects": "Projets illimités"
+				},
+				"title": "Entreprise"
+			},
+			"free": {
+				"description": "Commencez gratuitement",
+				"features": {
+					"anotherFeature": "Une autre fonctionnalité incroyable",
+					"limitedSupport": "Support limité"
+				},
+				"title": "Gratuit"
+			},
+			"lifetime": {
+				"description": "Achetez une fois. Utilisez pour toujours.",
+				"features": {
+					"extendSupport": "Support étendu",
+					"noRecurringCosts": "Pas de frais récurrents"
+				},
+				"title": "À vie"
+			},
+			"pro": {
+				"description": "Idéal pour les équipes",
+				"features": {
+					"anotherFeature": "Une autre fonctionnalité incroyable",
+					"fiveMembers": "Jusqu'à 5 membres",
+					"fullSupport": "Support complet"
+				},
+				"title": "Pro"
+			}
+		},
+		"purchase": "Acheter",
+		"recommended": "Recommandé",
+		"subscribe": "S'abonner",
+		"title": "Tarifs",
+		"trialPeriod": "{days} {days, plural, one {jour} other {jours}} d'essai gratuit",
+		"year": "{count, plural, one {an} other {{count} ans}}",
+		"yearly": "Annuel",
+		"perSeat": "place"
+	}
+}

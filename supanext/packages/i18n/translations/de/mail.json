@@ -1,0 +1,33 @@
+{
+	"common": {
+		"openLinkInBrowser": "Wenn du den Link in einem anderen Browser als deinem Standardbrowser öffnen möchtest, kopiere diesen und füge ihn in die Adresszeile deines Browsers ein:",
+		"otp": "Einmaliges Passwort",
+		"useLink": "oder nutze den folgenden Link:"
+	},
+	"emailVerification": {
+		"body": "Hallo!\nbitte klicke auf den unten stehenden Link, um diese neue E-Mail-Adresse zu bestätigen.",
+		"confirmEmail": "E-Mail verifizieren",
+		"subject": "E-Mail bestätigen"
+	},
+	"forgotPassword": {
+		"body": "Hallo,\n\ndu hast eine Passwortzurücksetzung beantragt.\n\n\nKlicke auf den unten stehenden Link, um dein Passwort zurückzusetzen.",
+		"resetPassword": "Passwort zurücksetzen",
+		"subject": "Passwort zurücksetzen"
+	},
+	"magicLink": {
+		"body": "Hey,\ndu hast eine Anmelde-E-Mail von supastarter angefordert.\n\nKlicke auf den unten stehenden Link, um dich anzumelden.",
+		"login": "Login",
+		"subject": "Login bei supastarter"
+	},
+	"newUser": {
+		"body": "Hallo,\n\nVielen Dank, dass du dich bei Supastarter angemeldet hast.\n\n\nUm mit der Nutzung unserer App zu beginnen, bestätige bitte deine E-Mail-Adresse, indem du auf den untenstehenden Link klickst.",
+		"confirmEmail": "E-Mail bestätigen",
+		"subject": "E-Mail bestätigen"
+	},
+	"organizationInvitation": {
+		"body": "Du wurdest eingeladen, der Organisation {organizationName} beizutreten. Klicke auf den Button unten oder kopiere den Link und füge ihn in den Browser deiner Wahl ein, um die Einladung anzunehmen und der Organisation beizutreten.",
+		"headline": "Einladung zur Organisation {organizationName}",
+		"join": "Tritt der Organisation bei",
+		"subject": "Du wurdest eingeladen, einer Organisation beizutreten"
+	}
+}

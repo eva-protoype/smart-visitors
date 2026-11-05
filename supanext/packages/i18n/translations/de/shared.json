@@ -1,0 +1,61 @@
+{
+	"pricing": {
+		"choosePlan": "Plan auswählen",
+		"contactSales": "Vertrieb kontaktieren",
+		"description": "Wähle das passende Paket für dich aus.",
+		"getStarted": "Jetzt loslegen",
+		"month": "Monat",
+		"monthly": "Monatlich",
+		"products": {
+			"basic": {
+				"description": "Perfekt für den Einstieg",
+				"features": {
+					"anotherFeature": "Ein weiteres erstaunliches Merkmal",
+					"limitedSupport": "Begrenzter Support"
+				},
+				"title": "Basic"
+			},
+			"enterprise": {
+				"description": "Maßgeschneiderter Plan für deine Anforderungen",
+				"features": {
+					"enterpriseSupport": "Support für Unternehmen",
+					"unlimitedProjects": "Unbegrenzte Projekte"
+				},
+				"title": "Enterprise"
+			},
+			"free": {
+				"description": "Kostenloser Start",
+				"features": {
+					"anotherFeature": "Ein weiteres erstaunliches Merkmal",
+					"limitedSupport": "Begrenzter Support"
+				},
+				"title": "Free"
+			},
+			"lifetime": {
+				"description": "Einmal kaufen. Für immer verwenden.",
+				"features": {
+					"extendSupport": "Erweiterter Support",
+					"noRecurringCosts": "Keine wiederkehrenden Kosten"
+				},
+				"title": "Lifetime"
+			},
+			"pro": {
+				"description": "Am besten für Teams",
+				"features": {
+					"anotherFeature": "Ein weiteres erstaunliches Merkmal",
+					"fiveMembers": "Bis zu 5 Mitglieder",
+					"fullSupport": "Voller Support"
+				},
+				"title": "Pro"
+			}
+		},
+		"purchase": "Kaufen",
+		"recommended": "Empfohlen",
+		"subscribe": "Abonnieren",
+		"title": "Preise",
+		"trialPeriod": "{days} {days, plural, one {Tag} other {Tage}} kostenlose Testphase",
+		"year": "Jahr",
+		"yearly": "Jährlich",
+		"perSeat": "Sitz"
+	}
+}

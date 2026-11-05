@@ -1,0 +1,82 @@
+"use client";
+
+import { Badge } from "@repo/ui/components/badge";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@repo/ui/components/card";
+import { useLocaleCurrency } from "@shared/hooks/locale-currency";
+import { useFormatter } from "next-intl";
+import { type PropsWithChildren, useMemo } from "react";
+
+export function StatsTile({
+	title,
+	value,
+	context,
+	trend,
+	valueFormat,
+	children,
+}: PropsWithChildren<{
+	title: string;
+	value: number;
+	valueFormat: "currency" | "number" | "percentage";
+	context?: string;
+	icon?: React.ReactNode;
+	trend?: number;
+}>) {
+	const format = useFormatter();
+	const localeCurrency = useLocaleCurrency();
+
+	const formattedValue = useMemo(() => {
+		// format currency
+		if (valueFormat === "currency") {
+			return format.number(value, {
+				style: "currency",
+				currency: localeCurrency,
+			});
+		}
+		// format percentage
+		if (valueFormat === "percentage") {
+			return format.number(value, {
+				style: "percent",
+			});
+		}
+		// format default number
+		return format.number(value);
+	}, [value, valueFormat, format, localeCurrency]);
+
+	const formattedTrend = useMemo(() => {
+		if (!trend) {
+			return null;
+		}
+		return `${trend >= 0 ? "+" : ""}${format.number(trend, {
+			style: "percent",
+		})}`;
+	}, [trend, format]);
+
+	return (
+		<Card>
+			<CardHeader className="pb-2">
+				<CardTitle>{title}</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<div className="flex items-center justify-between">
+					<strong className="font-semibold text-2xl lg:text-3xl">
+						{formattedValue}
+						{context && <small>{context}</small>}
+					</strong>
+					{trend && (
+						<Badge status={trend > 0 ? "success" : "error"}>
+							{formattedTrend}
+						</Badge>
+					)}
+				</div>
+				{children ? (
+					<div className="mt-4 w-full">{children}</div>
+				) : null}
+			</CardContent>
+		</Card>
+	);
+}

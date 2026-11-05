@@ -1,0 +1,18 @@
+{
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@repo/tsconfig": "workspace:*",
+		"@types/node": "catalog:"
+	},
+	"main": "./index.ts",
+	"name": "@repo/utils",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"type-check": "tsc --noEmit"
+	},
+	"types": "./**/.tsx",
+	"version": "0.0.0",
+	"dependencies": {
+		"zod": "catalog:"
+	}
+}

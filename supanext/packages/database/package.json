@@ -1,0 +1,33 @@
+{
+	"dependencies": {
+		"@paralleldrive/cuid2": "^3.3.0",
+		"@prisma/adapter-pg": "catalog:",
+		"@prisma/client": "catalog:",
+		"drizzle-orm": "catalog:",
+		"drizzle-zod": "catalog:",
+		"pg": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@repo/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"dotenv-cli": "catalog:",
+		"dotenv": "catalog:",
+		"drizzle-kit": "catalog:",
+		"prisma": "catalog:",
+		"prisma-zod-generator": "catalog:"
+	},
+	"main": "./index.ts",
+	"name": "@repo/database",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"generate": "dotenv -e ../../../.env -- prisma generate --no-hints",
+		"push": "dotenv -e ../../../.env -- prisma db push",
+		"migrate": "dotenv -e ../../../.env -- prisma migrate dev",
+		"studio": "dotenv -e ../../../.env -- prisma studio",
+		"type-check": "tsc --noEmit"
+	},
+	"types": "./**/.tsx",
+	"version": "0.0.0"
+}

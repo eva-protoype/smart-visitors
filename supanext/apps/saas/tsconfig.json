@@ -1,0 +1,26 @@
+{
+	"extends": "@repo/tsconfig/nextjs.json",
+	"compilerOptions": {
+		"plugins": [{ "name": "next" }],
+		"paths": {
+			"@config": ["./config"],
+			"@organizations/*": ["./modules/organizations/*"],
+			"@auth/*": ["./modules/auth/*"],
+			"@settings/*": ["./modules/settings/*"],
+			"@payments/*": ["./modules/payments/*"],
+			"@i18n/*": ["./modules/i18n/*"],
+			"@admin/*": ["./modules/admin/*"],
+			"@ai/*": ["./modules/ai/*"],
+			"@onboarding/*": ["./modules/onboarding/*"],
+			"@shared/*": ["./modules/shared/*"]
+		}
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.cjs",
+		"**/*.mjs",
+		".next/types/**/*.ts"
+	],
+	"exclude": ["node_modules"]
+}

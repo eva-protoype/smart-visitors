@@ -1,0 +1,61 @@
+{
+	"pricing": {
+		"choosePlan": "Elegir plan",
+		"contactSales": "Contactar ventas",
+		"description": "Elige el plan que mejor te funcione.",
+		"getStarted": "Comenzar",
+		"month": "{count, plural, one {mes} other {{count} meses}}",
+		"monthly": "Mensual",
+		"products": {
+			"basic": {
+				"description": "Perfecto para equipos pequeños.",
+				"features": {
+					"anotherFeature": "Otra función increíble",
+					"limitedSupport": "Soporte limitado"
+				},
+				"title": "Básico"
+			},
+			"enterprise": {
+				"description": "Plan personalizado según tus necesidades",
+				"features": {
+					"enterpriseSupport": "Soporte empresarial",
+					"unlimitedProjects": "Proyectos ilimitados"
+				},
+				"title": "Empresa"
+			},
+			"free": {
+				"description": "Comienza gratis",
+				"features": {
+					"anotherFeature": "Otra función increíble",
+					"limitedSupport": "Soporte limitado"
+				},
+				"title": "Gratis"
+			},
+			"lifetime": {
+				"description": "Compra una vez. Úsalo para siempre.",
+				"features": {
+					"extendSupport": "Soporte extendido",
+					"noRecurringCosts": "Sin costos recurrentes"
+				},
+				"title": "De por vida"
+			},
+			"pro": {
+				"description": "Ideal para equipos",
+				"features": {
+					"anotherFeature": "Otra función increíble",
+					"fiveMembers": "Hasta 5 miembros",
+					"fullSupport": "Soporte completo"
+				},
+				"title": "Pro"
+			}
+		},
+		"purchase": "Comprar",
+		"recommended": "Recomendado",
+		"subscribe": "Suscribirse",
+		"title": "Precios",
+		"trialPeriod": "{days} {days, plural, one {día} other {días}} de prueba gratis",
+		"year": "{count, plural, one {año} other {{count} años}}",
+		"yearly": "Anual",
+		"perSeat": "asiento"
+	}
+}

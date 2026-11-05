@@ -1,0 +1,154 @@
+{
+	"blog": {
+		"description": "Lisez les dernières actualités de notre entreprise",
+		"title": "Mon super blog",
+		"back": "Retour au blog"
+	},
+	"changelog": {
+		"description": "Derniers changements.",
+		"title": "Modifications"
+	},
+	"contact": {
+		"description": "Nous sommes là pour vous aider. Veuillez utiliser le formulaire ci-dessous pour nous contacter.",
+		"form": {
+			"email": "E-mail",
+			"message": "Message",
+			"name": "Nom",
+			"notifications": {
+				"error": "Nous sommes désolés, nous n'avons pas pu envoyer votre message. Veuillez réessayer plus tard.",
+				"success": "Votre message a été envoyé avec succès. Nous vous répondrons dès que possible."
+			},
+			"submit": "Envoyer le message"
+		},
+		"title": "Contactez-nous"
+	},
+	"documentation": {
+		"title": "Documentation"
+	},
+	"faq": {
+		"description": "Avez-vous des questions ? Nous sommes là pour vous.",
+		"title": "Questions fréquemment posées",
+		"items": {
+			"refundPolicy": {
+				"question": "Quelle est la politique de remboursement ?",
+				"answer": "Nous offrons une garantie de remboursement de 30 jours si vous n'êtes pas satisfait de notre produit."
+			},
+			"cancelSubscription": {
+				"question": "Comment annuler mon abonnement ?",
+				"answer": "Vous pouvez annuler votre abonnement en visitant la page de facturation."
+			},
+			"changePlan": {
+				"question": "Puis-je changer de forfait ?",
+				"answer": "Oui, vous pouvez changer de forfait à tout moment en visitant la page de facturation."
+			},
+			"freeTrial": {
+				"question": "Proposez-vous un essai gratuit ?",
+				"answer": "Oui, nous proposons un essai gratuit de 14 jours."
+			}
+		}
+	},
+	"home": {
+		"hero": {
+			"new": "Nouveau :",
+			"featureBadge": "Fonctionnalité incroyable de votre SaaS",
+			"title": "Votre SaaS révolutionnaire construit avec Next.js",
+			"subtitle": "Ceci est une application de démonstration construite avec supastarter. Elle vous fera gagner beaucoup de temps et d'efforts pour construire votre prochain SaaS.",
+			"getStarted": "Commencer",
+			"documentation": "Documentation",
+			"imageAlt": "Notre application",
+			"builtWith": "Construit et livré avec ces outils incroyables"
+		},
+		"features": {
+			"badge": "Fonctionnalités incroyables",
+			"title": "Des fonctionnalités que vos clients adoreront",
+			"description": "Dans cette section, vous pouvez présenter toutes les fonctionnalités que votre SaaS offre et comment elles peuvent bénéficier à vos clients.",
+			"feature1": {
+				"title": "Fonctionnalité 1",
+				"subtitle": "Faites plus avec notre SaaS incroyable.",
+				"description": "C'est une fonctionnalité brillante. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration.",
+				"benefit1": {
+					"title": "Avantage 1",
+					"description": "C'est un avantage incroyable. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration."
+				},
+				"benefit2": {
+					"title": "Avantage 2",
+					"description": "C'est un avantage incroyable. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration."
+				},
+				"benefit3": {
+					"title": "Avantage 3",
+					"description": "C'est un avantage incroyable. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration."
+				}
+			},
+			"feature2": {
+				"title": "Fonctionnalité 2",
+				"subtitle": "Votre SaaS peut aussi faire ça.",
+				"description": "Un autre texte de démonstration pour une autre fonctionnalité.",
+				"benefit1": {
+					"title": "Avantage 1",
+					"description": "C'est un avantage incroyable. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration."
+				},
+				"benefit2": {
+					"title": "Avantage 2",
+					"description": "C'est un avantage incroyable. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration."
+				},
+				"benefit3": {
+					"title": "Avantage 3",
+					"description": "C'est un avantage incroyable. Et ci-dessous vous pouvez voir quelques raisons pour lesquelles. C'est essentiellement juste un texte de démonstration."
+				}
+			}
+		}
+	},
+	"newsletter": {
+		"email": "E-mail",
+		"hints": {
+			"error": {
+				"message": "Impossible de s'abonner à la newsletter. Veuillez réessayer plus tard."
+			},
+			"success": {
+				"message": "Merci de vous être abonné à notre newsletter. Nous vous tiendrons informé.",
+				"title": "Abonné"
+			}
+		},
+		"submit": "S'abonner",
+		"subtitle": "Soyez parmi les premiers à accéder à supastarter.nextjs.",
+		"title": "Accès anticipé"
+	},
+	"notFound": {
+		"code": "404",
+		"title": "Page non trouvée",
+		"goToDashboard": "Aller au tableau de bord",
+		"goToHomepage": "Aller à l'accueil"
+	},
+	"common": {
+		"footer": {
+			"blog": "Blog",
+			"features": "Fonctionnalités",
+			"pricing": "Tarifs",
+			"privacyPolicy": "Politique de confidentialité",
+			"termsAndConditions": "Conditions générales",
+			"builtWith": "Construit avec supastarter"
+		},
+		"menu": {
+			"blog": "Blog",
+			"changelog": "Modifications",
+			"contact": "Contact",
+			"dashboard": "Tableau de bord",
+			"docs": "Docs",
+			"faq": "FAQ",
+			"login": "Connexion",
+			"pricing": "Tarifs"
+		},
+		"aria": {
+			"menu": "Menu",
+			"language": "Langue"
+		},
+		"tableOfContents": {
+			"title": "Sur cette page"
+		},
+		"colorMode": {
+			"system": "Système",
+			"light": "Clair",
+			"dark": "Sombre"
+		}
+	}
+}

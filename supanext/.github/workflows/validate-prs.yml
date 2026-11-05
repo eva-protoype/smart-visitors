@@ -1,0 +1,44 @@
+name: Validate PRs
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  BETTER_AUTH_SECRET: "better-auth-e2e-secret-1234567890"
+
+jobs:
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: 2.3.13
+      - name: Run Biome
+        run: biome ci .
+  e2e:
+    name: Run e2e tests
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install && pnpm --filter database generate
+      - name: Run Playwright tests for SaaS app
+        run: pnpm --filter saas e2e:ci
+      - name: Run Playwright tests for Marketing app
+        run: pnpm --filter marketing e2e:ci
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: apps/saas/playwright-report/
+          retention-days: 30

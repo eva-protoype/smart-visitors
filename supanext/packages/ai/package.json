@@ -1,0 +1,23 @@
+{
+	"dependencies": {
+		"@ai-sdk/anthropic": "catalog:",
+		"@ai-sdk/openai": "catalog:",
+		"@ai-sdk/react": "catalog:",
+		"ai": "catalog:",
+		"openai": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@repo/tsconfig": "workspace:*",
+		"@types/react": "catalog:",
+		"typescript": "catalog:"
+	},
+	"main": "./index.ts",
+	"name": "@repo/ai",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"type-check": "tsc --noEmit"
+	},
+	"types": "./**/.tsx",
+	"version": "0.0.0"
+}
