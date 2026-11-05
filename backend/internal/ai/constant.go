@@ -17,12 +17,14 @@ var AllowedTables = map[string]bool{
 	"access_logs": true,
 	"passes":      true,
 	"users":       true,
+	"visitors":    true,
 }
 
 var AllowedColumns = map[string]map[string]bool{
-	"access_logs": {"id": true, "pass_id": true, "gate_id": true, "scan_time": true, "status": true},
-	"passes":      {"id": true, "visitor_name": true, "visitor_email": true, "qr_token": true, "status": true, "host_user_id": true, "valid_until": true},
-	"users":       {"id": true, "username": true, "email": true, "role": true},
+	"access_logs": {"id": true, "pass_id": true, "gate_id": true, "scan_time": true, "outcome": true, "direction": true, "reason": true},
+	"passes":      {"id": true, "status": true, "host_id": true, "valid_from": true, "valid_until": true, "mode": true, "gate_id": true},
+	"users":       {"id": true, "username": true, "role": true, "disabled_at": true},
+	"visitors":    {"id": true, "created_via": true, "created_at": true, "consent_at": true},
 }
 
 var BlockedSQLKeywords = []string{

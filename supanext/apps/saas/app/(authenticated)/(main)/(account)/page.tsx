@@ -1,5 +1,6 @@
-import { getSession } from "@auth/lib/server";
+import { getGoSession } from "@auth/lib/go-session";
 import { Card } from "@repo/ui";
+import { RoleWorkspace } from "@visitors/components/RoleWorkspace";
 import {
 	Activity,
 	ArrowUpRight,
@@ -11,9 +12,12 @@ import {
 	UsersRound,
 } from "lucide-react";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 const BACKEND_URL = (
-	process.env.BACKEND_URL ?? "http://localhost:8000"
+	process.env.API_URL ??
+	process.env.BACKEND_URL ??
+	"http://localhost:8000"
 ).replace(/\/$/, "");
 
 interface ApiResult<T> {
@@ -30,9 +34,10 @@ interface QueryResponse {
 interface ScanFlag {
 	gate_id?: string;
 	scan_time?: string;
-	status?: string;
+	outcome?: string;
 	anomaly_score?: number;
 	reasons?: string[];
+	is_suspicious?: boolean;
 }
 
 interface FlagsResponse {
@@ -50,8 +55,15 @@ async function requestApi<T>(
 	init?: RequestInit,
 ): Promise<ApiResult<T>> {
 	try {
+		const requestHeaders = await headers();
+		const cookie = requestHeaders.get("cookie");
+		const apiHeaders = new Headers(init?.headers);
+		if (cookie) {
+			apiHeaders.set("Cookie", cookie);
+		}
 		const response = await fetch(`${BACKEND_URL}${path}`, {
 			...init,
+			headers: apiHeaders,
 			cache: "no-store",
 		});
 
@@ -72,7 +84,7 @@ async function requestApi<T>(
 }
 
 function queryApi(question: string, limit = 1) {
-	return requestApi<QueryResponse>("/ai/query", {
+	return requestApi<QueryResponse>("/api/ai/query", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ question, limit }),
@@ -97,10 +109,40 @@ function formatScanTime(value: string): string {
 }
 
 export default async function AppStartPage() {
-	const session = await getSession();
+	const session = await getGoSession();
 
 	if (!session) {
 		redirect("/login");
+	}
+	if (session.user.role !== "admin") {
+		return (
+			<div className="mx-auto max-w-4xl space-y-6">
+				<header>
+					<p className="mb-2 text-sm font-medium text-muted-foreground">
+						{new Intl.DateTimeFormat("en", {
+							weekday: "long",
+							month: "long",
+							day: "numeric",
+						}).format(new Date())}
+					</p>
+					<h1 className="text-3xl font-semibold tracking-tight">
+						Welcome back, {session.user.name}
+					</h1>
+					<p className="mt-2 text-sm text-muted-foreground">
+						Your {session.user.role} workspace is ready.
+					</p>
+				</header>
+				<Card className="border-border bg-[#f0f4ef] p-6 shadow-none">
+					<h2 className="font-semibold">Visitor access</h2>
+					<p className="mt-2 text-sm text-muted-foreground">
+						{session.user.role === "host"
+							? "Create a visitor invite for an upcoming visit."
+							: "Validate a visitor's pass at your gate."}
+					</p>
+				</Card>
+				<RoleWorkspace role={session.user.role} />
+			</div>
+		);
 	}
 
 	const [
@@ -112,14 +154,14 @@ export default async function AppStartPage() {
 		recentScans,
 		flags,
 	] = await Promise.all([
-		requestApi<HealthResponse>("/health"),
+		requestApi<HealthResponse>("/healthz"),
 		queryApi("how many visitors?"),
 		queryApi("how many active passes?"),
 		queryApi("how many approved scans today?"),
 		queryApi("how many denied entries today?"),
 		queryApi("show last 8 scans", 8),
 		requestApi<FlagsResponse>(
-			"/ai/anomaly/flags?limit=5&only_suspicious=true",
+			"/api/ai/anomaly/flags?limit=5",
 		),
 	]);
 
@@ -138,7 +180,8 @@ export default async function AppStartPage() {
 		flags.error,
 	].filter((error): error is string => error !== null);
 	const scans = recentScans.data;
-	const suspiciousFlags = flags.data?.flags ?? [];
+	const suspiciousFlags =
+		flags.data?.flags.filter((flag) => flag.is_suspicious) ?? [];
 	const isOnline = health.data?.status === "ok";
 
 	return (
@@ -338,7 +381,7 @@ export default async function AppStartPage() {
 											{flag.gate_id ?? "Unknown gate"}
 										</span>
 										<span className="text-xs text-muted-foreground">
-											{flag.status ?? "—"}
+											{flag.outcome ?? "—"}
 										</span>
 									</div>
 									<p className="mt-1 text-xs text-muted-foreground">

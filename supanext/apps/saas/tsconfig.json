@@ -12,7 +12,8 @@
 			"@admin/*": ["./modules/admin/*"],
 			"@ai/*": ["./modules/ai/*"],
 			"@onboarding/*": ["./modules/onboarding/*"],
-			"@shared/*": ["./modules/shared/*"]
+			"@shared/*": ["./modules/shared/*"],
+			"@visitors/*": ["./modules/visitors/*"]
 		}
 	},
 	"include": [

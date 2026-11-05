@@ -1,4 +1,4 @@
-import { LoginForm } from "@auth/components/LoginForm";
+import { GoLoginForm } from "@auth/components/GoLoginForm";
 import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -13,5 +13,5 @@ export async function generateMetadata() {
 }
 
 export default function LoginPage() {
-	return <LoginForm />;
+	return <GoLoginForm />;
 }

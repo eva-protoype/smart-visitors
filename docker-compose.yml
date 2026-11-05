@@ -1,37 +1,132 @@
 services:
-  backend:
-    build: ./backend
-    container_name: smart-visitors-backend
-    ports:
-      - "8000:8000"
-    environment:
-      - DB_CONNECTION=sqlite:///./data/smart_visitors.db
-      - AI_ARTIFACT_DIR=./artifacts
-    volumes:
-      - backend-data:/app/artifacts
-      # Persist the SQLite file itself — without this, recreating the
-      # backend container loses users, passes, and the audit log.
-      - backend-db:/app/data
+  caddy:
+    image: caddy:2-alpine
     restart: unless-stopped
+    ports:
+      - "${HTTP_HOST_PORT:-4000}:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
+      APP_SCHEME: ${APP_SCHEME:-http}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - public
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/openapi.json')"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 80"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  web:
+    build:
+      context: ./supanext
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_URL: http://api:8000
+      NEXT_PUBLIC_SAAS_URL: ${NEXT_PUBLIC_SAAS_URL:-http://localhost:4000}
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - public
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - photos:/data/photos
+      - artifacts:/data/artifacts
+    depends_on:
+      db:
+        condition: service_healthy
+      ml:
+        condition: service_healthy
+    networks:
+      - public
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8000/readyz >/dev/null"]
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 20s
 
-  frontend:
-    build: ./frontend
-    container_name: smart-visitors-frontend
-    ports:
-      - "8501:8501"
-    environment:
-      - BACKEND_URL=http://backend:8000
-    depends_on:
-      backend:
-        condition: service_healthy
+  db:
+    image: postgres:16-alpine
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER must be set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB must be set in .env}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  ml:
+    build:
+      context: ./backend/ml
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ML_SERVICE_TOKEN: ${ML_SERVICE_TOKEN:?ML_SERVICE_TOKEN must be set in .env}
+      API_URL: http://api:8000
+      ARTIFACTS_DIR: /data/artifacts
+      OFF_HOUR_START: ${OFF_HOUR_START:-22}
+      OFF_HOUR_END: ${OFF_HOUR_END:-6}
+    volumes:
+      - artifacts:/data/artifacts
+    networks:
+      - internal
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health', timeout=2)"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
 
 volumes:
-  backend-data:
-  backend-db:
+  dbdata:
+  photos:
+  artifacts:
+  caddy_data:
+  caddy_config:
+
+networks:
+  public:
+    driver: bridge
+  internal:
+    driver: bridge
+    internal: true

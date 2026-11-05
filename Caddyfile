@@ -1,0 +1,8 @@
+{$APP_SCHEME:http}://{$APP_DOMAIN:localhost} {
+	encode zstd gzip
+
+	@api path /api/* /healthz /readyz
+	reverse_proxy @api api:8000
+
+	reverse_proxy web:3000
+}

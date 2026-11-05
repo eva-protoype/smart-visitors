@@ -53,55 +53,43 @@ type Flag struct {
 }
 
 func FetchAllLogs(db *sql.DB) ([]LogRow, error) {
-	rows, err := db.Query(`SELECT id, pass_id, gate_id, scan_time, status FROM access_logs ORDER BY scan_time ASC`)
+	rows, err := db.Query(`
+		SELECT id::text, COALESCE(pass_id::text, ''), COALESCE(gate_id::text, ''),
+		       scan_time, outcome
+		FROM access_logs ORDER BY scan_time ASC`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var out []LogRow
 	for rows.Next() {
-		var id, passID, status string
-		var gate sql.NullString
-		var st sql.NullString
-		if err := rows.Scan(&id, &passID, &gate, &st, &status); err != nil {
+		var item LogRow
+		if err := rows.Scan(&item.ID, &item.PassID, &item.GateID, &item.ScanTime, &item.Status); err != nil {
 			return nil, err
 		}
-		g := "Main Gate"
-		if gate.Valid && gate.String != "" {
-			g = gate.String
-		}
-		t := time.Now().UTC()
-		if st.Valid && st.String != "" {
-			t = parseTime(st.String)
-		}
-		out = append(out, LogRow{ID: id, PassID: passID, GateID: g, ScanTime: t, Status: status})
+		item.ScanTime = item.ScanTime.UTC()
+		out = append(out, item)
 	}
 	return out, rows.Err()
 }
 
 func FetchRecentLogs(db *sql.DB, limit int) ([]LogRow, error) {
-	rows, err := db.Query(`SELECT id, pass_id, gate_id, scan_time, status FROM access_logs ORDER BY scan_time DESC LIMIT ?`, limit)
+	rows, err := db.Query(`
+		SELECT id::text, COALESCE(pass_id::text, ''), COALESCE(gate_id::text, ''),
+		       scan_time, outcome
+		FROM access_logs ORDER BY scan_time DESC LIMIT $1`, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var out []LogRow
 	for rows.Next() {
-		var id, passID, status string
-		var gate sql.NullString
-		var st sql.NullString
-		if err := rows.Scan(&id, &passID, &gate, &st, &status); err != nil {
+		var item LogRow
+		if err := rows.Scan(&item.ID, &item.PassID, &item.GateID, &item.ScanTime, &item.Status); err != nil {
 			return nil, err
 		}
-		g := "Main Gate"
-		if gate.Valid && gate.String != "" {
-			g = gate.String
-		}
-		t := time.Now().UTC()
-		if st.Valid && st.String != "" {
-			t = parseTime(st.String)
-		}
-		out = append(out, LogRow{ID: id, PassID: passID, GateID: g, ScanTime: t, Status: status})
+		item.ScanTime = item.ScanTime.UTC()
+		out = append(out, item)
 	}
 	return out, rows.Err()
 }
@@ -126,31 +114,24 @@ func FetchSiblings(db *sql.DB, passIDs []string) (map[string][]LogRow, error) {
 		if i > 0 {
 			ph += ","
 		}
-		ph += "?"
+		ph += fmt.Sprintf("$%d", i+1)
 		args = append(args, id)
 	}
-	rows, err := db.Query(`SELECT id, pass_id, gate_id, scan_time, status FROM access_logs WHERE pass_id IN (`+ph+`)`, args...)
+	rows, err := db.Query(`
+		SELECT id::text, COALESCE(pass_id::text, ''), COALESCE(gate_id::text, ''),
+		       scan_time, outcome
+		FROM access_logs WHERE pass_id IN (`+ph+`)`, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id, passID, status string
-		var gate sql.NullString
-		var st sql.NullString
-		if err := rows.Scan(&id, &passID, &gate, &st, &status); err != nil {
+		var item LogRow
+		if err := rows.Scan(&item.ID, &item.PassID, &item.GateID, &item.ScanTime, &item.Status); err != nil {
 			return nil, err
 		}
-		g := "Main Gate"
-		if gate.Valid && gate.String != "" {
-			g = gate.String
-		}
-		t := time.Now().UTC()
-		if st.Valid && st.String != "" {
-			t = parseTime(st.String)
-		}
-		r := LogRow{ID: id, PassID: passID, GateID: g, ScanTime: t, Status: status}
-		grouped[passID] = append(grouped[passID], r)
+		item.ScanTime = item.ScanTime.UTC()
+		grouped[item.PassID] = append(grouped[item.PassID], item)
 	}
 	return grouped, rows.Err()
 }

@@ -1,7 +1,6 @@
 import { cn, Toaster } from "@repo/ui";
 import { ApiClientProvider } from "@shared/components/ApiClientProvider";
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
@@ -11,12 +10,6 @@ import "./globals.css";
 import "cropperjs/dist/cropper.css";
 import { config } from "@config";
 import { ClientProviders } from "@shared/components/ClientProviders";
-
-const sansFont = Figtree({
-	weight: ["300", "400", "500", "600", "700"],
-	subsets: ["latin"],
-	variable: "--font-sans",
-});
 
 export const metadata: Metadata = {
 	title: {
@@ -34,7 +27,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 		<html
 			lang={locale}
 			suppressHydrationWarning
-			className={sansFont.variable}
 		>
 			<body
 				className={cn(

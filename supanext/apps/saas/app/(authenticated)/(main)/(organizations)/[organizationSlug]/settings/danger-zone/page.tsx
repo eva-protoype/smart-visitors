@@ -1,19 +1,5 @@
-import { DeleteOrganizationForm } from "@organizations/components/DeleteOrganizationForm";
-import { SettingsList } from "@shared/components/SettingsList";
-import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata() {
-	const t = await getTranslations("organizations.settings.dangerZone");
-
-	return {
-		title: t("title"),
-	};
-}
-
-export default function OrganizationSettingsPage() {
-	return (
-		<SettingsList>
-			<DeleteOrganizationForm />
-		</SettingsList>
-	);
+export default function DangerZonePage() {
+	redirect("/");
 }

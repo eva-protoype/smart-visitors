@@ -21,13 +21,12 @@ func httpErr(code int, detail string) *APIError { return &APIError{Code: code, D
 // ---------- gate + date ----------
 
 var roleMap = [][2]string{
-	{"visitors", "visitor"}, {"visitor", "visitor"},
 	{"hosts", "host"}, {"host", "host"},
 	{"guards", "guard"}, {"guard", "guard"},
 	{"admins", "admin"}, {"admin", "admin"},
 }
 
-var passStatuses = []string{"active", "used", "expired", "revoked"}
+var passStatuses = []string{"draft", "active", "used", "expired", "revoked", "shredded"}
 
 var expiryRe = regexp.MustCompile(`\bexpiring\b|\bexpires?\b|valid until`)
 var expiredRe = regexp.MustCompile(`\bexpired\b`)
@@ -84,15 +83,15 @@ func DateFilter(question string) (frag string, params map[string]any, label stri
 		if days > 365 {
 			days = 365
 		}
-		return " AND date(scan_time) >= date('now', :days_ago)",
+		return " AND scan_time >= now() + (:days_ago)::interval",
 			map[string]any{"days_ago": fmt.Sprintf("-%d days", days)},
 			fmt.Sprintf("last %d days", days)
 	}
 	if strings.Contains(q, "yesterday") {
-		return " AND date(scan_time) = date('now', '-1 day')", map[string]any{}, "yesterday"
+		return " AND scan_time >= date_trunc('day', now()) - interval '1 day' AND scan_time < date_trunc('day', now())", map[string]any{}, "yesterday"
 	}
 	if strings.Contains(q, "today") {
-		return " AND date(scan_time) = date('now')", map[string]any{}, "today"
+		return " AND scan_time >= date_trunc('day', now())", map[string]any{}, "today"
 	}
 	return "", map[string]any{}, ""
 }
@@ -193,6 +192,10 @@ func BuildQuery(question string, limit *int, maxRows int) (string, map[string]an
 	}
 
 	// 1. users by role
+	if regexp.MustCompile(`how many\s+visitors?\b`).MatchString(q) {
+		return "SELECT COUNT(*) AS count FROM visitors LIMIT 1",
+			map[string]any{}, []string{"count"}, "visitors count", nil
+	}
 	for _, rm := range roleMap {
 		plural, role := rm[0], rm[1]
 		re := regexp.MustCompile(`how many\s+` + regexp.QuoteMeta(plural) + `\b`)
@@ -221,7 +224,7 @@ func BuildQuery(question string, limit *int, maxRows int) (string, map[string]an
 			p[k] = v
 		}
 		p["limit_0"] = lim
-		return "SELECT gate_id, COUNT(*) AS entries FROM access_logs" + dateSQL + " GROUP BY gate_id ORDER BY entries DESC LIMIT :limit_0",
+		return "SELECT gate_id, COUNT(*) AS entries FROM access_logs WHERE true" + dateSQL + " GROUP BY gate_id ORDER BY entries DESC LIMIT :limit_0",
 			p, []string{"gate_id", "entries"}, "entries by gate", nil
 	}
 	// 4. counts by scan status
@@ -240,7 +243,7 @@ func BuildQuery(question string, limit *int, maxRows int) (string, map[string]an
 			for k, v := range params {
 				p[k] = v
 			}
-			return "SELECT COUNT(*) AS count FROM access_logs WHERE status = :status_0" + whereSuffix + " LIMIT 1",
+			return "SELECT COUNT(*) AS count FROM access_logs WHERE outcome = :status_0" + whereSuffix + " LIMIT 1",
 				p, []string{"count"}, scope, nil
 		}
 		scope := "entries"
@@ -278,7 +281,7 @@ func BuildQuery(question string, limit *int, maxRows int) (string, map[string]an
 				n = nn
 			}
 		}
-		cols := []string{"id", "pass_id", "gate_id", "scan_time", "status"}
+		cols := []string{"id", "pass_id", "gate_id", "scan_time", "outcome", "direction", "reason"}
 		if strings.Contains(q, "denied") || strings.Contains(q, "approved") {
 			sw := "denied"
 			if strings.Contains(q, "approved") && !strings.Contains(q, "denied") {
@@ -292,7 +295,7 @@ func BuildQuery(question string, limit *int, maxRows int) (string, map[string]an
 				p[k] = v
 			}
 			p["limit_0"] = n
-			return "SELECT " + strings.Join(cols, ", ") + " FROM access_logs WHERE status = :status_0" + whereSuffix + " ORDER BY scan_time DESC LIMIT :limit_0",
+			return "SELECT " + strings.Join(cols, ", ") + " FROM access_logs WHERE outcome = :status_0" + whereSuffix + " ORDER BY scan_time DESC LIMIT :limit_0",
 				p, cols, scope, nil
 		}
 		scope := fmt.Sprintf("last %d scans", n)
@@ -313,15 +316,15 @@ func BuildQuery(question string, limit *int, maxRows int) (string, map[string]an
 	}
 	// 6. expired vs expiring
 	if expiredRe.MatchString(q) {
-		return "SELECT id, visitor_name, visitor_email, status, valid_until FROM passes WHERE status = 'expired' ORDER BY valid_until DESC LIMIT :limit_0",
+		return "SELECT id, status, valid_until FROM passes WHERE status = 'expired' ORDER BY valid_until DESC LIMIT :limit_0",
 			map[string]any{"limit_0": lim},
-			[]string{"id", "visitor_name", "visitor_email", "status", "valid_until"},
+			[]string{"id", "status", "valid_until"},
 			"expired passes", nil
 	}
 	if expiryRe.MatchString(q) {
-		return "SELECT id, visitor_name, visitor_email, status, valid_until FROM passes WHERE status = 'active' ORDER BY valid_until ASC LIMIT :limit_0",
+		return "SELECT id, status, valid_until FROM passes WHERE status = 'active' ORDER BY valid_until ASC LIMIT :limit_0",
 			map[string]any{"limit_0": lim},
-			[]string{"id", "visitor_name", "visitor_email", "status", "valid_until"},
+			[]string{"id", "status", "valid_until"},
 			"active passes by expiry", nil
 	}
 	return "", nil, nil, "", httpErr(http.StatusBadRequest, "Could not understand question. Try e.g.: "+ExampleQuestions[0])
@@ -336,10 +339,17 @@ func RunQuery(db *sql.DB, question string, limit *int, maxRows int) (string, map
 	if verr := ValidateSQL(s); verr != nil {
 		return "", nil, nil, nil, "", nil, verr
 	}
+	if gate := FindGate(question); gate != nil {
+		var id string
+		if err := db.QueryRow(`SELECT id::text FROM gates WHERE lower(name) = lower($1) AND active = true`, *gate).Scan(&id); err != nil {
+			return "", nil, nil, nil, "", nil, httpErr(http.StatusBadRequest, "Gate name not recognised")
+		}
+		params["gate_0"] = id
+	}
 	execSQL, args := toPositional(s, params)
 	rows, err := db.Query(execSQL, args...)
 	if err != nil {
-		return "", nil, nil, nil, "", nil, httpErr(http.StatusBadRequest, err.Error())
+		return "", nil, nil, nil, "", nil, httpErr(http.StatusInternalServerError, "Query failed")
 	}
 	defer rows.Close()
 	fetchN := ClampQueryLimit(limit, maxRows)
@@ -354,7 +364,10 @@ func RunQuery(db *sql.DB, question string, limit *int, maxRows int) (string, map
 			ptrs[i] = &vals[i]
 		}
 		if err := rows.Scan(ptrs...); err != nil {
-			break
+			return "", nil, nil, nil, "", nil, httpErr(http.StatusInternalServerError, "Could not read query results")
+		}
+		if err := rows.Err(); err != nil {
+			return "", nil, nil, nil, "", nil, httpErr(http.StatusInternalServerError, "Could not read query results")
 		}
 		row := make([]any, len(columns))
 		for i, v := range vals {
@@ -394,18 +407,19 @@ func RunQuery(db *sql.DB, question string, limit *int, maxRows int) (string, map
 	return s, params, columns, out, answer, warnings, nil
 }
 
-// toPositional rewrites :name to ? in order of first appearance.
+// toPositional rewrites :name parameters to PostgreSQL positional placeholders.
 func toPositional(s string, params map[string]any) (string, []any) {
 	re := regexp.MustCompile(`:[a-z_0-9]+`)
 	var args []any
 	out := re.ReplaceAllStringFunc(s, func(m string) string {
 		key := m[1:]
+		index := len(args) + 1
 		if v, ok := params[key]; ok {
 			args = append(args, v)
-			return "?"
+			return fmt.Sprintf("$%d", index)
 		}
 		args = append(args, nil)
-		return "?"
+		return fmt.Sprintf("$%d", index)
 	})
 	return out, args
 }

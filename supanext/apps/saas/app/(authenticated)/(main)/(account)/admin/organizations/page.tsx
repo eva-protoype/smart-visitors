@@ -1,5 +1,5 @@
-import { OrganizationList } from "@admin/component/organizations/OrganizationList";
+import { redirect } from "next/navigation";
 
 export default function AdminOrganizationsPage() {
-	return <OrganizationList />;
+	redirect("/admin/users");
 }
