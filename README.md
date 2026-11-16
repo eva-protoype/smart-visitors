@@ -8,6 +8,24 @@ Built for high throughput, the system replaces vulnerable manual logbooks with s
 
 ## Features Explained for a Non-Technical Person
 
+## Current project structure
+
+The production frontend is the Supanext SaaS app. The old standalone Next template
+and Streamlit frontend have been removed to keep one source of truth.
+
+```text
+backend/                  Go API, database migrations, auth, passes, scans
+backend/ml/               anomaly-detection sidecar
+frontend/apps/saas/       live Next.js dashboard and visitor pages
+frontend/packages/        shared frontend packages
+docs/                     project documentation and runbooks
+docker-compose.yml        local production-like stack
+Caddyfile                 public reverse proxy
+```
+
+Run the app with `docker compose up -d --build` and open
+`http://localhost:4000`.
+
 ### What is this, in one line?
 
 Think of it as a **digital visitor book + security pass system** for offices, apartments, or campuses. No paper register. Every visitor gets a temporary QR pass on their phone, and every entry is recorded automatically.
@@ -66,7 +84,9 @@ There are two AI helpers. Both are *advisors* — they never open gates by thems
 
 ### System overview
 
-FastAPI backend + SQLAlchemy (SQLite locally, Postgres in prod). Three core tables: `users`, `passes`, `access_logs`. A Streamlit UI (`frontend/app.py`, via Docker Compose) covers users, passes, gate scans, anomaly flags, and plain-English queries. No auth yet — role-based route enforcement is still to come.
+The current system uses a Go API with PostgreSQL, a Next.js Supanext dashboard,
+and a Python ML sidecar. Caddy exposes the web app and API through one local URL.
+Authentication and role-based access are enforced by the Go API.
 
 ### Phase 1 (MVP) — what exists
 

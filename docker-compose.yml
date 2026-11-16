@@ -28,7 +28,7 @@ services:
 
   web:
     build:
-      context: ./supanext
+      context: ./frontend
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:

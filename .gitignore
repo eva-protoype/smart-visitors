@@ -1,8 +1,4 @@
 # Node dependencies & build outputs
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-
 # Python environments & cache
 backend/env/
 backend/venv/

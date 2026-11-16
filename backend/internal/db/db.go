@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS passes (
 	purpose TEXT NOT NULL,
 	valid_from TIMESTAMPTZ NOT NULL,
 	valid_until TIMESTAMPTZ NOT NULL,
-	created_via TEXT NOT NULL CHECK (created_via IN ('regular','walk_in')),
+	created_via TEXT NOT NULL CHECK (created_via IN ('regular','walk_in','self_service')),
 	created_by UUID NOT NULL REFERENCES users(id),
 	invite_token_hash TEXT UNIQUE,
 	sticker_id UUID REFERENCES stickers(id),
@@ -124,6 +124,9 @@ CREATE TABLE IF NOT EXISTS passes (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	CHECK (valid_until > valid_from)
 );
+ALTER TABLE passes DROP CONSTRAINT IF EXISTS passes_created_via_check;
+ALTER TABLE passes ADD CONSTRAINT passes_created_via_check
+	CHECK (created_via IN ('regular','walk_in','self_service'));
 CREATE INDEX IF NOT EXISTS idx_passes_host_status ON passes(host_id, status);
 CREATE INDEX IF NOT EXISTS idx_passes_status_expiry ON passes(status, valid_until);
 

@@ -1,0 +1,46 @@
+# Production image overlay — pull prebuilt images from GHCR instead of building
+# on the target host. Built by .github/workflows/deploy.yml.
+#
+# Usage:
+#   # one-time on the server
+#   echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u <github-user> --password-stdin
+#
+#   # deploy / update
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --remove-orphans
+#
+# Required in .env:
+#   IMAGE_PREFIX=ghcr.io/<github-owner-lowercase>
+#   IMAGE_TAG=latest        # or a commit SHA for pinned deploys
+#
+# Combine with the tunnel overlay on a home PC:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     -f docker-compose.tunnel.yml up -d --no-build
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  web:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set (example: ghcr.io/owner)}/smart-visitors-web:${IMAGE_TAG:-latest}
+    pull_policy: always
+    logging: *default-logging
+
+  api:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set (example: ghcr.io/owner)}/smart-visitors-api:${IMAGE_TAG:-latest}
+    pull_policy: always
+    logging: *default-logging
+
+  ml:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set (example: ghcr.io/owner)}/smart-visitors-ml:${IMAGE_TAG:-latest}
+    pull_policy: always
+    logging: *default-logging
+
+  caddy:
+    logging: *default-logging
+
+  db:
+    logging: *default-logging

@@ -63,7 +63,7 @@ five containers**.
 | `backend/ml/isolation.py`, `backend/ml/` | Keep; becomes the `ml` FastAPI sidecar, adapted to contract in §11. |
 | `backend/src/**`, `backend/main.py`, `requirement.txt` | Legacy Python app — delete at Phase A end. |
 | `frontend/` (Streamlit) | Delete at Phase C end (after Next dashboards land). |
-| `supanext/` | Keep as dashboard app. Remove auth (better-auth) usage; keep `ui`/`utils`; drop dormant packages from builds (`mail`, `payments`, `storage`, `marketing`, `docs`, `mail-preview`). |
+| `frontend/` | Keep as dashboard app. Remove auth (better-auth) usage; keep `ui`/`utils`; drop dormant packages from builds (`mail`, `payments`, `storage`, `marketing`, `docs`, `mail-preview`). |
 | `docker-compose.yml` | Replace with 5-service spec (§5). |
 | `task.md` | Replace with this document. |
 | `docs/` | Keep; add `docs/runbook.md` at Phase F. |
@@ -76,7 +76,7 @@ five containers**.
 
 ```
                        ┌──────────────────────────── single server ────────────────────────────┐
- browser ── caddy :80/443 ──┬── web    Next.js (supanext)      :3000   dashboards, visitor page  │
+ browser ── caddy :80/443 ──┬── web    Next.js (frontend)      :3000   dashboards, visitor page  │
                             ├── api    Go (chi)                 :8000   domain + auth + audit   │
                             │              ├── db     Postgres 16 :5432  (internal net only)     │
                             │              └── ml     FastAPI      :8100  (internal net only)     │
@@ -95,7 +95,7 @@ five containers**.
 | Service | Image/build | Ports | Depends | Health |
 |---|---|---|---|---|
 | `caddy` | caddy:2 | 80, 443 | web, api | tcp probe |
-| `web` | build `./supanext` (standalone Next) | 3000 internal | api (startup, not runtime-critical) | GET /api/health |
+| `web` | build `./frontend` (standalone Next) | 3000 internal | api (startup, not runtime-critical) | GET /api/health |
 | `api` | build `./backend` (Go, multi-stage) | 8000 internal | db healthy, ml healthy | GET /healthz, /readyz(db+master key loaded) |
 | `db` | postgres:16-alpine | 5432 internal | — | pg_isready |
 | `ml` | build `./backend/ml` (python:3.12-slim + scikit-learn) | 8100 internal | — | GET /health |
@@ -518,7 +518,7 @@ constraints, solo build).
 
 ---
 
-## 12. Dashboards (supanext, `web`)
+## 12. Dashboards (frontend, `web`)
 
 ### 12.1 Integration notes
 - Remove `better-auth` + `packages/auth` imports; API is Go JWT in an httpOnly cookie; client
@@ -623,7 +623,7 @@ chain → run 3 walkthrough queries.
 |---|---|---|
 | A | Bootstrap, JWT+RBAC middleware, users/gates/audit scaffolds; delete legacy `src/` python; DDL migration; bootstrap-admin path | smoke: login admin, mint host+guard; RBAC denies host hitting `/users`; chain tables exist with genesis |
 | B | visitors/visits/passes/secrets/invite/fill/scan + chains; `-p/{token}`; QR route | full API flow via curl; attack suite §15 rows 1–10 pass; p95 met on scan |
-| C | Admin + Host + Guard dashboards + visitor page in supanext (Streamlit deleted) | All role pages reachable with correct visibility; decrypt drawer writes audit rows |
+| C | Admin + Host + Guard dashboards + visitor page in frontend (Streamlit deleted) | All role pages reachable with correct visibility; decrypt drawer writes audit rows |
 | D | Walk-in + sticker claim + printable batch sheets | Phone-less visitor round-trip works on one device; sticker statuses obey lifecycle |
 | E | ml sidecar hookup (train + flags), text2sql surfaced admin-only, perms on `/internal/*` | flags populate after seed; admin sees suspicious feed; internal HMAC rejects others |
 | F | Retention jobs, rate-limit tuning, offline-fallback sheet + paper register, `/healthz`+`readyz`, `docs/runbook.md`, README regen, compose prod profile | `docker compose up` from clean; retention dry-run sweeps; runbook complete |

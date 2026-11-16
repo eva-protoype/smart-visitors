@@ -66,6 +66,8 @@ func main() {
 		api.Post("/fill/{token}", handlers.InviteFill(database, cfg))
 		api.Post("/fill/{token}/photo", handlers.VisitorPhotoUpload(database, cfg))
 		api.Get("/p/{token}", handlers.PublicPass(database, cfg))
+		api.Get("/self-entry/meta", handlers.SelfEntryMeta(database, cfg))
+		api.Post("/self-entry", handlers.SelfEntryCreate(database, cfg))
 		api.Post("/auth/login", handlers.Login(database, cfg))
 		api.Group(func(protected chi.Router) {
 			protected.Use(auth.Middleware(cfg.JWTSecret, func(ctx context.Context, id string) (auth.User, error) {
@@ -83,10 +85,13 @@ func main() {
 			protected.With(auth.RequireRoles("admin")).Post("/users/{id}/disable", handlers.UserDisable(database))
 			protected.With(auth.RequireRoles("admin")).Get("/events", handlers.AuditEventsList(database))
 			protected.With(auth.RequireRoles("admin")).Get("/logs/verify", handlers.VerifyLogs(database))
-			protected.With(auth.RequireRoles("admin", "host")).Post("/visits", handlers.VisitsCreate(database, cfg))
+			protected.With(auth.RequireRoles("admin")).Get("/admin/visitors", handlers.AdminVisitors(database, cfg))
+			protected.With(auth.RequireRoles("admin")).Get("/admin/visitors.csv", handlers.AdminVisitorsCSV(database, cfg))
+			protected.With(auth.RequireRoles("admin")).Post("/visits", handlers.VisitsCreate(database, cfg))
 			protected.With(auth.RequireRoles("admin", "host")).Get("/visits", handlers.VisitsList(database, cfg))
 			protected.With(auth.RequireRoles("admin", "host")).Get("/passes/{id}/details", handlers.PassDetails(database, cfg))
 			protected.With(auth.RequireRoles("admin", "host", "guard")).Get("/visitors/{id}/photo", handlers.VisitorPhotoGet(database, cfg))
+			protected.With(auth.RequireRoles("host")).Post("/host/scan", handlers.HostPassScan(database, cfg))
 			protected.With(auth.RequireRoles("admin", "host")).Get("/passes/{id}/qr.png", handlers.PassQR(database, cfg))
 			protected.With(auth.RequireRoles("admin", "host")).Post("/passes/{id}/revoke", handlers.PassRevoke(database))
 			protected.With(auth.RequireRoles("admin")).Post("/passes/{id}/extend", handlers.PassExtend(database, cfg))

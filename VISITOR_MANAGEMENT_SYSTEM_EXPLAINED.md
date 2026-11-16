@@ -1,13 +1,19 @@
 # Visitor Management System with Anomaly Detection — Explained in Simple English
 
+> **Architecture note:** This document contains the original Streamlit/FastAPI
+> design notes. The active implementation is now `backend/` (Go),
+> `backend/ml/` (Python sidecar), and `frontend/apps/saas/` (Next.js frontend),
+> deployed through Docker Compose and Caddy. Use the root `README.md` and
+> `task.md` for the current layout and behavior.
+
 > This file explains the **Smart Visitors** project in this repo in plain words.
 > It covers what the system does, how it is built at a high level, and how each
 > small part works at a low level. No prior ML or backend knowledge is assumed.
 
 **Where the code lives:**
 
-- Backend API: `backend/main.py` + `backend/src/`
-- Frontend UI: `frontend/app.py`
+- Backend API: `backend/main.go` + `backend/internal/`
+- Frontend UI: `frontend/apps/saas/`
 - Deployment: `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`
 
 ---

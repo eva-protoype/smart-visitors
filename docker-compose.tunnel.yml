@@ -1,0 +1,38 @@
+# Cloudflare Tunnel overlay — exposes the stack without opening router ports.
+#
+# Usage (home / college PC behind NAT):
+#   docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build
+#
+# Setup (one-time, in Cloudflare Zero Trust dashboard):
+#   1. Networks -> Tunnels -> Create tunnel -> copy the token
+#   2. Add a public hostname:
+#        subdomain: visitors
+#        domain:    example.com
+#        service:   http://caddy:80
+#   3. Put the token in .env as CLOUDFLARE_TUNNEL_TOKEN
+#   4. Set in .env:
+#        APP_DOMAIN=visitors.example.com
+#        APP_SCHEME=http
+#        APP_BASE_URL=https://visitors.example.com
+#        NEXT_PUBLIC_SAAS_URL=https://visitors.example.com
+#   5. Rebuild web so NEXT_PUBLIC_SAAS_URL is baked in:
+#        docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build
+#
+# TLS terminates at Cloudflare's edge; the origin speaks plain HTTP on the
+# internal Docker network. Do NOT expose ports 80/443 to the internet.
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN must be set in .env}
+    depends_on:
+      caddy:
+        condition: service_healthy
+    networks:
+      - public
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
