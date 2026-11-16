@@ -25,17 +25,17 @@ x-logging: &default-logging
 
 services:
   web:
-    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set (example: ghcr.io/owner)}/smart-visitors-web:${IMAGE_TAG:-latest}
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set e.g. ghcr.io/owner}/smart-visitors-web:${IMAGE_TAG:-latest}
     pull_policy: always
     logging: *default-logging
 
   api:
-    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set (example: ghcr.io/owner)}/smart-visitors-api:${IMAGE_TAG:-latest}
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set e.g. ghcr.io/owner}/smart-visitors-api:${IMAGE_TAG:-latest}
     pull_policy: always
     logging: *default-logging
 
   ml:
-    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set (example: ghcr.io/owner)}/smart-visitors-ml:${IMAGE_TAG:-latest}
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX must be set e.g. ghcr.io/owner}/smart-visitors-ml:${IMAGE_TAG:-latest}
     pull_policy: always
     logging: *default-logging
 

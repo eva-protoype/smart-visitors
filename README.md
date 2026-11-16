@@ -26,6 +26,14 @@ Caddyfile                 public reverse proxy
 Run the app with `docker compose up -d --build` and open
 `http://localhost:4000`.
 
+### Deploying it
+
+- Home / college PC behind NAT: Cloudflare Tunnel overlay —
+  `docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build`
+- VM with prebuilt GHCR images: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build`
+- Full runbook (tunnel setup, HTTPS, backups, updates, GitHub Pages showcase):
+  [`deploy/README.md`](deploy/README.md)
+
 ### What is this, in one line?
 
 Think of it as a **digital visitor book + security pass system** for offices, apartments, or campuses. No paper register. Every visitor gets a temporary QR pass on their phone, and every entry is recorded automatically.

@@ -1,0 +1,95 @@
+name: Build and publish images
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  PLATFORMS: linux/amd64
+
+jobs:
+  build:
+    name: build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            context: ./backend
+            dockerfile: ./backend/Dockerfile
+          - name: web
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+          - name: ml
+            context: ./backend/ml
+            dockerfile: ./backend/ml/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/smart-visitors-${{ matrix.name }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=,format=short
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+  # Optional: pull on a VM with reachable SSH. Enable by setting repository
+  # variable DEPLOY_ENABLED=true and the DEPLOY_* secrets (see deploy/README.md).
+  # Home PCs behind NAT should use deploy/update.sh on a cron instead.
+  deploy:
+    name: deploy over ssh
+    needs: build
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            git pull --ff-only
+            OVERLAYS="-f docker-compose.yml -f docker-compose.prod.yml"
+            if [ -f docker-compose.tunnel.yml ] && grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.' .env; then
+              OVERLAYS="$OVERLAYS -f docker-compose.tunnel.yml"
+            fi
+            docker compose $OVERLAYS pull
+            docker compose $OVERLAYS up -d --no-build --remove-orphans
+            docker image prune -f

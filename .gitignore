@@ -18,6 +18,9 @@ backend/artifacts/
 .env
 *.env.local
 
+# Deployment backups (db dumps, photo archives)
+deploy/backups/
+
 # System files
 .DS_Store
 Thumbs.db
