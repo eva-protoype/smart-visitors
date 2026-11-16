@@ -23,12 +23,14 @@ export const listPurchases = protectedProcedure
 			organizationId: z.string().optional(),
 		}),
 	)
-	.handler(async ({ input: { organizationId }, context: { user } }) => {
+		.handler(async ({ input: { organizationId }, context: { user } }) => {
 		const purchases = organizationId
 			? await getPurchasesByOrganizationId(organizationId)
 			: await getPurchasesByUserId(user.id);
 
-		return purchases.map((purchase) => ({
+		type Purchase = Awaited<ReturnType<typeof getPurchasesByUserId>>[number];
+
+		return purchases.map((purchase: Purchase) => ({
 			...purchase,
 			planId: getPlanIdByProviderPriceId(purchase.priceId),
 			planPrice:
