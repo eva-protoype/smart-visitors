@@ -25,20 +25,20 @@ interface NavigationItem {
 
 const NAVIGATION: Record<GoUser["role"], NavigationItem[]> = {
 	admin: [
-		{ href: "/", label: "Overview", icon: ShieldCheck },
+		{ href: "/admin", label: "Overview", icon: ShieldCheck },
 		{ href: "/admin/users", label: "Team accounts", icon: UsersRound },
-		{ href: "/#activity", label: "Gate activity", icon: ClipboardList },
-		{ href: "/#security", label: "Security watch", icon: ShieldAlert },
+		{ href: "/admin#activity", label: "Gate activity", icon: ClipboardList },
+		{ href: "/admin#security", label: "Security watch", icon: ShieldAlert },
 	],
 	host: [
-		{ href: "/", label: "My workspace", icon: BadgeCheck },
-		{ href: "/#host-scan", label: "Verify pass", icon: ShieldCheck },
-		{ href: "/#visits", label: "My visits", icon: UsersRound },
+		{ href: "/host", label: "My workspace", icon: BadgeCheck },
+		{ href: "/host#host-scan", label: "Verify pass", icon: ShieldCheck },
+		{ href: "/host#visits", label: "My visits", icon: UsersRound },
 	],
 	guard: [
-		{ href: "/", label: "Gate console", icon: ScanLine },
-		{ href: "/#gate-scan", label: "Scan pass", icon: ShieldCheck },
-		{ href: "/#walk-in", label: "Walk-in", icon: ClipboardList },
+		{ href: "/guard", label: "Gate console", icon: ScanLine },
+		{ href: "/scanner", label: "Scan pass", icon: ShieldCheck },
+		{ href: "/guard#walk-in", label: "Walk-in", icon: ClipboardList },
 	],
 };
 

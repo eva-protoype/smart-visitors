@@ -39,10 +39,29 @@ const nextConfig: NextConfig = {
 				destination: "/:organizationSlug/settings/general",
 				permanent: true,
 			},
+		];
+	},
+	async rewrites() {
+		return [
 			{
 				source: "/admin",
-				destination: "/admin/users",
-				permanent: true,
+				destination: "/",
+			},
+			{
+				source: "/host",
+				destination: "/",
+			},
+			{
+				source: "/guard",
+				destination: "/",
+			},
+			{
+				source: "/scanner",
+				destination: "/",
+			},
+			{
+				source: "/visitor",
+				destination: "/visitor-entry",
 			},
 		];
 	},

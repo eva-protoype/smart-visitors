@@ -1,15 +1,14 @@
-# GitHub Pages landing page
+# GitHub Pages entry points
 
-`index.html` is a static single-file landing page published at
-**https://project-dawnguard.github.io/** from the
-`project-DawnGuard/project-DawnGuard.github.io` repo.
+The Pages site is a static launcher. It does not contain the Go API, database,
+or authenticated dashboard. Each path redirects to the matching interface on
+the home server:
 
-## Editing
+- `/admin/`
+- `/host/`
+- `/guard/`
+- `/scanner/`
+- `/visitor/`
 
-1. Update `index.html` here (`__LIVE_URL__` is replaced with the current tunnel URL).
-2. Run `deploy/github/sync-landing.sh`.
-3. GitHub Pages rebuilds in ~30 seconds.
-
-The page is only a showcase — the real app keeps running on the home PC behind the
-Cloudflare Tunnel. The four role sites (`/admin/`, `/guard/`, `/scanner/`, `/visitor/`)
-are separate repos under the same org; see `docs/github-pages-split-plan.md`.
+Set the repository variable `HOME_SERVER_URL` to the public HTTPS URL of the
+home-server Caddy endpoint before enabling the Pages workflow.

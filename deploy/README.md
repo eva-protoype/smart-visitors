@@ -7,7 +7,7 @@ Two supported shapes:
 | **Home / college PC + Cloudflare Tunnel** | `https://visitors.yourdomain.com` (or random `*.trycloudflare.com` for a demo) | free + optional domain | no public IP, NAT/CGNAT, no router config |
 | **VM + Docker Compose + GHCR images** | `https://visitors.yourdomain.com` via Caddy | ~₹350–1000/mo | always-on, no machine at home |
 
-GitHub Pages **cannot** host this app (Next.js SSR, cookies, Go API, Postgres). It can host a static showcase page that links to the live app — see [GitHub Pages](#github-pages-showcase).
+GitHub Pages **cannot** host this app (Next.js SSR, cookies, Go API, Postgres). It hosts stable entry links that redirect to the live home server.
 
 ---
 
@@ -65,11 +65,16 @@ Leave `APP_SCHEME=http`: Cloudflare terminates TLS, so Caddy must **not** redire
 HTTP → HTTPS at the origin. The Go API detects `X-Forwarded-Proto: https` from
 Cloudflare and marks the session cookie `Secure` automatically.
 
-### 1.4 Start
+### 1.4 Start everything with one script
+
+After configuring `.env`, use:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d --build
+deploy/home-server.sh
 ```
+
+The script automatically adds the Cloudflare Tunnel when
+`CLOUDFLARE_TUNNEL_TOKEN` is configured.
 
 Check:
 
@@ -207,40 +212,20 @@ snapshots alone are not backups.
 | `up` rebuilds every time | local build mode | use `docker-compose.prod.yml` + `--no-build` |
 | ml container OOM on 1 GB VM | sklearn sidecar | 2 GB RAM, or temporarily disable ml (also remove it from `api`'s `depends_on`) |
 
-## 7. GitHub Pages sites
+## 7. GitHub Pages entry URLs
 
-All static sites live under the `project-DawnGuard` org on one origin:
+This repository publishes one project Pages site. After Pages is enabled, the
+stable URLs are:
 
-| Repo | URL |
+| Interface | URL |
 |---|---|
-| `project-DawnGuard.github.io` | `https://project-dawnguard.github.io/` (landing) |
-| `admin` | `https://project-dawnguard.github.io/admin/` |
-| `guard` | `https://project-dawnguard.github.io/guard/` |
-| `scanner` | `https://project-dawnguard.github.io/scanner/` |
-| `visitor` | `https://project-dawnguard.github.io/visitor/` |
+| Launcher | `https://eva-protoype.github.io/smart-visitors/` |
+| Admin | `https://eva-protoype.github.io/smart-visitors/admin/` |
+| Host | `https://eva-protoype.github.io/smart-visitors/host/` |
+| Guard | `https://eva-protoype.github.io/smart-visitors/guard/` |
+| Scanner | `https://eva-protoype.github.io/smart-visitors/scanner/` |
+| Visitor | `https://eva-protoype.github.io/smart-visitors/visitor/` |
 
-Provisioning:
-
-```bash
-# one-time, after the org exists in the GitHub web UI
-deploy/github/bootstrap-org.sh
-
-# push the landing page after editing deploy/github-pages/index.html
-deploy/github/sync-landing.sh
-```
-
-`bootstrap-org.sh` is idempotent: it creates missing repos, enables Pages and skips
-anything that already exists. The four role repos currently serve placeholder pages;
-the static apps replace them in phases P1–P4 of
-[`docs/github-pages-split-plan.md`](../docs/github-pages-split-plan.md).
-
-Notes:
-
-- The org root uses the legacy branch build; role sites use GitHub Actions
-  (`site/index.html` + `.github/workflows/pages.yml` in each repo).
-- All four role paths share **one origin**, so CORS needs only
-  `https://project-dawnguard.github.io`.
-- The landing page CTA points at the current quick-tunnel URL. Quick tunnels change on
-  every restart — update `__LIVE_URL__`/the URL and re-run `sync-landing.sh`, or move to
-  a named tunnel in §1.2.
-- This is showcase hosting only; the real app keeps running on the home PC.
+Set the repository Actions variable `HOME_SERVER_URL` to the public HTTPS
+address of the home server. These Pages URLs then redirect to the live
+interfaces on that server; GitHub Pages never receives API data or secrets.
