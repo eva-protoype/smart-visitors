@@ -214,18 +214,15 @@ snapshots alone are not backups.
 
 ## 7. GitHub Pages entry URLs
 
-This repository publishes one project Pages site. After Pages is enabled, the
-stable URLs are:
+The `project-DawnGuard` organization owns the Pages sites. The stable URLs are:
 
 | Interface | URL |
 |---|---|
-| Launcher | `https://eva-protoype.github.io/smart-visitors/` |
-| Admin | `https://eva-protoype.github.io/smart-visitors/admin/` |
-| Host | `https://eva-protoype.github.io/smart-visitors/host/` |
-| Guard | `https://eva-protoype.github.io/smart-visitors/guard/` |
-| Scanner | `https://eva-protoype.github.io/smart-visitors/scanner/` |
-| Visitor | `https://eva-protoype.github.io/smart-visitors/visitor/` |
+| Launcher | `https://project-dawnguard.github.io/` |
+| Admin | `https://project-dawnguard.github.io/admin/` |
+| Guard | `https://project-dawnguard.github.io/guard/` |
+| Scanner | `https://project-dawnguard.github.io/scanner/` |
+| Visitor | `https://project-dawnguard.github.io/visitor/` |
 
-Set the repository Actions variable `HOME_SERVER_URL` to the public HTTPS
-address of the home server. These Pages URLs then redirect to the live
-interfaces on that server; GitHub Pages never receives API data or secrets.
+These Pages sites redirect to the live interfaces on the home server; GitHub
+Pages never receives API data or secrets.
