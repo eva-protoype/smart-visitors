@@ -42,7 +42,7 @@ func requestIPAfterRealIP(t *testing.T, config ProxyConfig, remoteAddr string, h
 	return host
 }
 
-func TestRealIPUsesCloudflareHeaderFromTrustedProxy(t *testing.T) {
+func TestRealIPPrefersForwardedChainOverCloudflareHeader(t *testing.T) {
 	config := ProxyConfig{
 		TrustHeaders: true,
 		TrustedCIDRs: mustPrefixes(t, "172.16.0.0/12"),
@@ -50,6 +50,19 @@ func TestRealIPUsesCloudflareHeaderFromTrustedProxy(t *testing.T) {
 	headers := map[string]string{
 		"CF-Connecting-IP": "203.0.113.9",
 		"X-Forwarded-For":  "198.51.100.7, 172.18.0.3",
+	}
+	if got := requestIPAfterRealIP(t, config, "172.18.0.2:54321", headers); got != "198.51.100.7" {
+		t.Fatalf("client IP = %q, want 198.51.100.7 from the append-only XFF chain", got)
+	}
+}
+
+func TestRealIPUsesCloudflareHeaderWhenForwardedForIsAbsent(t *testing.T) {
+	config := ProxyConfig{
+		TrustHeaders: true,
+		TrustedCIDRs: mustPrefixes(t, "172.16.0.0/12"),
+	}
+	headers := map[string]string{
+		"CF-Connecting-IP": "203.0.113.9",
 	}
 	if got := requestIPAfterRealIP(t, config, "172.18.0.2:54321", headers); got != "203.0.113.9" {
 		t.Fatalf("client IP = %q, want 203.0.113.9", got)

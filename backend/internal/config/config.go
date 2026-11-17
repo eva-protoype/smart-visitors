@@ -153,6 +153,10 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	trustProxyHeaders := envBool("TRUST_PROXY_HEADERS", false)
+	if trustProxyHeaders && len(trustedProxyCIDRs) == 0 {
+		return Config{}, errors.New("TRUSTED_PROXY_CIDRS is required when TRUST_PROXY_HEADERS=true")
+	}
 
 	appBaseURL := getenv("APP_BASE_URL", "http://localhost")
 
@@ -175,7 +179,7 @@ func Load() (Config, error) {
 		VisitorBaseURL:       getenv("VISITOR_BASE_URL", appBaseURL),
 		VisitorHashRoutes:    envBool("VISITOR_HASH_ROUTES", false),
 		CORSAllowedOrigins:   envOrigins("CORS_ALLOWED_ORIGINS"),
-		TrustProxyHeaders:    envBool("TRUST_PROXY_HEADERS", false),
+		TrustProxyHeaders:    trustProxyHeaders,
 		TrustedProxyCIDRs:    trustedProxyCIDRs,
 		OffHourStart:         envInt("OFF_HOUR_START", 22),
 		OffHourEnd:           envInt("OFF_HOUR_END", 6),

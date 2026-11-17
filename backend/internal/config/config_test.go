@@ -80,3 +80,12 @@ func TestLoadRejectsInvalidTrustedProxyCIDR(t *testing.T) {
 		t.Fatal("Load() succeeded with an invalid CIDR")
 	}
 }
+
+func TestLoadRejectsTrustHeadersWithoutTrustedCIDRs(t *testing.T) {
+	setMinimalEnv(t)
+	t.Setenv("TRUST_PROXY_HEADERS", "true")
+
+	if _, err := Load(); err == nil {
+		t.Fatal("Load() succeeded with proxy headers trusted but no trusted CIDRs")
+	}
+}

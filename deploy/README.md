@@ -57,7 +57,9 @@ NEXT_PUBLIC_SAAS_URL=https://visitors.yourdomain.com
 # multi-origin static apps (GitHub Pages)
 CORS_ALLOWED_ORIGINS=https://project-dawnguard.github.io
 TRUST_PROXY_HEADERS=true
-TRUSTED_PROXY_CIDRS=172.16.0.0/12
+# run: docker network inspect smart-visitors_public
+#      --format '{{range .IPAM.Config}}{{.Subnet}}{{end}}'
+TRUSTED_PROXY_CIDRS=172.21.0.0/16
 # leave empty until the visitor Pages app ships; defaults to APP_BASE_URL
 VISITOR_BASE_URL=
 VISITOR_HASH_ROUTES=false

@@ -197,23 +197,22 @@ apply. CORS is still restricted to the exact app origins.
 
 ---
 
-## 5. Backend changes required
-
-Existing facts verified in the repo:
+## 5. Backend changes (P0 implemented)
 
 | Fact | Location |
 |---|---|
 | Bearer auth already supported | `backend/internal/auth/auth.go:221-225` |
-| No CORS middleware anywhere | `backend/` — none found |
-| Rate limiting uses `r.RemoteAddr` | `backend/internal/handlers/passes.go:1118` (`clientIP`) |
-| One base URL builds all public links | `APP_BASE_URL` in `passes.go:257,420`, `self_entry.go:196`; `VISITOR_BASE_URL` overrides it after P0 |
+| CORS middleware | `backend/internal/middleware/cors.go` |
+| Trusted-proxy client IP | `backend/internal/middleware/realip.go` rewrites `RemoteAddr` before handlers |
+| Rate limiting uses `r.RemoteAddr` | `backend/internal/handlers/passes.go:1118` (`clientIP`) and `auth.go` (`loginKey`) |
+| Public links accept a visitor base URL | `backend/internal/handlers/public_url.go`; `VISITOR_BASE_URL` overrides `APP_BASE_URL` |
 | Login returns a token in JSON | `backend/internal/handlers/auth.go` |
 
-### 5.1 CORS middleware — new `backend/internal/http/CORS` (or `internal/middleware`)
+### 5.1 CORS middleware — `backend/internal/middleware/cors.go`
 
 ```go
 // env: CORS_ALLOWED_ORIGINS=https://project-dawnguard.github.io
-func CORS(allowed map[string]bool) func(http.Handler) http.Handler
+func CORS(allowedOrigins []string) func(http.Handler) http.Handler
 ```
 
 Requirements:
@@ -235,11 +234,17 @@ Wire in `backend/main.go` around the `/api` router. Keep `/healthz`, `/readyz` s
 Currently `clientIP()` returns the `cloudflared` container address for every request, so
 `RATE_LIMIT_SCAN`, `RATE_LIMIT_LOGIN` and audit IPs are effectively global. Required:
 
-- config `TRUST_PROXY_HEADERS=true` and `TRUSTED_PROXY_CIDRS=172.16.0.0/12`;
-- if the immediate peer is trusted, take the first valid address from
-  `CF-Connecting-IP`, else the first untrusted hop in `X-Forwarded-For`;
-- fall back to `RemoteAddr`;
-- unit tests for spoofed headers from untrusted peers;
+- config `TRUST_PROXY_HEADERS=true` and `TRUSTED_PROXY_CIDRS=<docker proxy subnet>`;
+- if the immediate peer is trusted, walk `X-Forwarded-For` from the right and take the
+  first address outside the proxy subnet; the header is append-only, so this is the
+  address Caddy actually saw. Use `CF-Connecting-IP` only when `X-Forwarded-For` is
+  absent (direct cloudflared → API path);
+- never trust `CF-Connecting-IP` when an append-only chain exists: a client can set that
+  header itself, while proxies append to `X-Forwarded-For`;
+- fall back to `RemoteAddr`; refuse to start if headers are trusted with no CIDRs;
+- do **not** list all RFC1918 ranges — only the Docker network that Caddy/cloudflared
+  share, otherwise a LAN client can spoof its own rate-limit key;
+- unit tests for spoofed headers from untrusted peers and forged CF headers;
 - use it for rate-limit keys and scan/audit metadata.
 
 Without this, public static apps make the rate limiter trivially incorrect.

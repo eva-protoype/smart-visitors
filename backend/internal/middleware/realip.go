@@ -42,6 +42,27 @@ func RealIP(config ProxyConfig) func(http.Handler) http.Handler {
 }
 
 func forwardedClientIP(r *http.Request, peer netip.Addr, isTrusted func(netip.Addr) bool) (netip.Addr, bool) {
+	// X-Forwarded-For is append-only: every proxy adds the peer it saw. Walk it
+	// from the right and return the first address outside the proxy network.
+	if header := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); header != "" {
+		hops := strings.Split(header, ",")
+		candidate := peer
+		for index := len(hops) - 1; index >= 0; index-- {
+			hop, ok := parseIP(hops[index])
+			if !ok {
+				return netip.Addr{}, false
+			}
+			if !isTrusted(hop) {
+				return hop, true
+			}
+			candidate = hop
+		}
+		return candidate, true
+	}
+
+	// Only use the Cloudflare header when no append-only chain exists. Caddy
+	// normally supplies X-Forwarded-For, which prevents a client-supplied CF
+	// header from choosing its own rate-limit key.
 	if header := strings.TrimSpace(r.Header.Get("CF-Connecting-IP")); header != "" {
 		if comma := strings.IndexByte(header, ','); comma >= 0 {
 			header = strings.TrimSpace(header[:comma])
@@ -51,25 +72,7 @@ func forwardedClientIP(r *http.Request, peer netip.Addr, isTrusted func(netip.Ad
 		}
 	}
 
-	header := strings.TrimSpace(r.Header.Get("X-Forwarded-For"))
-	if header == "" {
-		return netip.Addr{}, false
-	}
-
-	hops := strings.Split(header, ",")
-	candidate := peer
-	for index := len(hops) - 1; index >= 0; index-- {
-		hop, ok := parseIP(hops[index])
-		if !ok {
-			return netip.Addr{}, false
-		}
-		if !isTrusted(hop) {
-			return hop, true
-		}
-		candidate = hop
-	}
-
-	return candidate, true
+	return netip.Addr{}, false
 }
 
 func parseRemoteAddr(remoteAddr string) (netip.Addr, bool) {

@@ -11,5 +11,6 @@
 3. GitHub Pages rebuilds in ~30 seconds.
 
 The page is only a showcase — the real app keeps running on the home PC behind the
-Cloudflare Tunnel. The four role sites (`/admin/`, `/guard/`, `/scanner/`, `/visitor/`)
-are separate repos under the same org; see `docs/github-pages-split-plan.md`.
+Cloudflare Tunnel. At P4 the admin console takes over the org root and this landing page
+moves to `/landing/`. The role sites (`/guard/`, `/scanner/`, `/visitor/`) are separate
+repos under the same org; see `docs/github-pages-split-plan.md`.
