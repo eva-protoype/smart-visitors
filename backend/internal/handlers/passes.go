@@ -254,7 +254,7 @@ func VisitsCreate(database *sql.DB, cfg config.Config) http.HandlerFunc {
 			return
 		}
 		writeJSON(w, http.StatusCreated, map[string]any{
-			"pass_id": passID, "invite_url": strings.TrimRight(cfg.AppBaseURL, "/") + "/fill/" + inviteToken,
+			"pass_id": passID, "invite_url": visitorFillURL(cfg, inviteToken),
 			"status": "draft",
 		})
 	}
@@ -417,7 +417,7 @@ func InviteFill(database *sql.DB, cfg config.Config) http.HandlerFunc {
 		}
 		writeJSON(w, http.StatusOK, map[string]any{
 			"pass_id": passID, "status": "active", "token": "sv1:" + rawQRToken,
-			"visitor_url": strings.TrimRight(cfg.AppBaseURL, "/") + "/p/" + rawQRToken,
+			"visitor_url": visitorPassURL(cfg, rawQRToken),
 			"valid_from":  validFrom.UTC().Format(time.RFC3339),
 			"valid_until": validUntil.UTC().Format(time.RFC3339),
 		})

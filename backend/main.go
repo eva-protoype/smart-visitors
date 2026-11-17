@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"smart-visitors/internal/auth"
 	"smart-visitors/internal/config"
@@ -19,6 +19,7 @@ import (
 	"smart-visitors/internal/db"
 	"smart-visitors/internal/handlers"
 	"smart-visitors/internal/jobs"
+	appmiddleware "smart-visitors/internal/middleware"
 )
 
 func main() {
@@ -51,8 +52,12 @@ func main() {
 	go runMaintenance(database, cfg)
 
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.Recoverer)
+	router.Use(chimiddleware.RequestID)
+	router.Use(chimiddleware.Recoverer)
+	router.Use(appmiddleware.RealIP(appmiddleware.ProxyConfig{
+		TrustHeaders: cfg.TrustProxyHeaders,
+		TrustedCIDRs: cfg.TrustedProxyCIDRs,
+	}))
 	router.Use(requestLogger)
 	healthCheck := func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
@@ -61,6 +66,7 @@ func main() {
 	router.Get("/readyz", readiness(database, cfg))
 
 	router.Route("/api", func(api chi.Router) {
+		api.Use(appmiddleware.CORS(cfg.CORSAllowedOrigins))
 		api.Get("/healthz", healthCheck)
 		api.Get("/fill/{token}", handlers.InviteGet(database, cfg))
 		api.Post("/fill/{token}", handlers.InviteFill(database, cfg))
@@ -217,7 +223,7 @@ func requestLogger(next http.Handler) http.Handler {
 			route = "unmatched"
 		}
 		slog.Info("http request",
-			"request_id", middleware.GetReqID(r.Context()),
+			"request_id", chimiddleware.GetReqID(r.Context()),
 			"method", r.Method,
 			"route", route,
 			"role", auth.RequestRole(r.Context()),

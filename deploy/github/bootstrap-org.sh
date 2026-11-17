@@ -47,41 +47,33 @@ create_repo() {
 	fi
 }
 
-# Root Pages site: landing/showcase.
+# Root Pages site: becomes the admin console at P4. Until then it serves the landing page.
 create_repo "$ORG.github.io" \
-	"Smart Visitors — project landing page and showcase" \
+	"Smart Visitors — admin console (landing page until P4)" \
 	"https://$HOST/"
 
 # One project site per role. URLs are https://$HOST/<repo>/
-create_repo "admin" \
-	"Smart Visitors — admin console (static SPA)" \
-	"https://$HOST/admin/"
-
 create_repo "guard" \
 	"Smart Visitors — guard console (static SPA)" \
 	"https://$HOST/guard/"
 
 create_repo "scanner" \
-	"Smart Visitors — gate QR scanner kiosk (static PWA)" \
+	"Smart Visitors — host-side arrival verifier (static PWA)" \
 	"https://$HOST/scanner/"
 
 create_repo "visitor" \
 	"Smart Visitors — visitor invite and pass pages (public)" \
 	"https://$HOST/visitor/"
 
-# Optional, uncomment when the host dashboard URL is decided.
-# create_repo "host" \
-# 	"Smart Visitors — host dashboard (static SPA)" \
-# 	"https://$HOST/host/"
+# The landing page moves to a separate "landing" repo at P4; it is not created here.
 
 echo
 echo "Repos are under https://github.com/$ORG"
 echo "Public URLs (after each repo's first Pages deploy):"
-echo "  https://$HOST/"
-echo "  https://$HOST/admin/"
+echo "  https://$HOST/            admin (landing until P4)"
 echo "  https://$HOST/guard/"
-echo "  https://$HOST/scanner/"
+echo "  https://$HOST/scanner/    host-side verifier"
 echo "  https://$HOST/visitor/"
 echo
 echo "Next: set CORS_ALLOWED_ORIGINS on the API to https://$HOST"
-echo "(project paths share one origin, so one entry covers all four apps)."
+echo "(all role paths share one origin, so one entry covers every app)."
