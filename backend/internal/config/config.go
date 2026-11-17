@@ -4,8 +4,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/netip"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -24,6 +26,11 @@ type Config struct {
 	MLURL                string
 	MLServiceToken       string
 	AppBaseURL           string
+	VisitorBaseURL       string
+	VisitorHashRoutes    bool
+	CORSAllowedOrigins   []string
+	TrustProxyHeaders    bool
+	TrustedProxyCIDRs    []netip.Prefix
 	OffHourStart         int
 	OffHourEnd           int
 	AnomalyContamination float64
@@ -54,6 +61,59 @@ func envInt(key string, fallback int) int {
 	}
 
 	return parsed
+}
+
+func envBool(key string, fallback bool) bool {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return fallback
+	}
+
+	return parsed
+}
+
+func envOrigins(key string) []string {
+	value := os.Getenv(key)
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+
+	origins := make([]string, 0)
+	for _, candidate := range strings.Split(value, ",") {
+		origin := strings.TrimRight(strings.TrimSpace(candidate), "/")
+		if origin != "" {
+			origins = append(origins, origin)
+		}
+	}
+
+	return origins
+}
+
+func envPrefixes(key string) ([]netip.Prefix, error) {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return nil, nil
+	}
+
+	prefixes := make([]netip.Prefix, 0)
+	for _, candidate := range strings.Split(value, ",") {
+		raw := strings.TrimSpace(candidate)
+		if raw == "" {
+			continue
+		}
+		prefix, err := netip.ParsePrefix(raw)
+		if err != nil {
+			return nil, fmt.Errorf("%s contains invalid CIDR %q", key, raw)
+		}
+		prefixes = append(prefixes, prefix)
+	}
+
+	return prefixes, nil
 }
 
 func envHexKey(key string, minimumBytes int) ([]byte, error) {
@@ -89,6 +149,13 @@ func Load() (Config, error) {
 		contamination = parsed
 	}
 
+	trustedProxyCIDRs, err := envPrefixes("TRUSTED_PROXY_CIDRS")
+	if err != nil {
+		return Config{}, err
+	}
+
+	appBaseURL := getenv("APP_BASE_URL", "http://localhost")
+
 	return Config{
 		DatabaseURL:          getenv("DATABASE_URL", ""),
 		JWTSecret:            jwtSecret,
@@ -104,7 +171,12 @@ func Load() (Config, error) {
 		RateLimitLogin:       envInt("RATE_LIMIT_LOGIN", 5),
 		MLURL:                getenv("ML_URL", "http://ml:8100"),
 		MLServiceToken:       os.Getenv("ML_SERVICE_TOKEN"),
-		AppBaseURL:           getenv("APP_BASE_URL", "http://localhost"),
+		AppBaseURL:           appBaseURL,
+		VisitorBaseURL:       getenv("VISITOR_BASE_URL", appBaseURL),
+		VisitorHashRoutes:    envBool("VISITOR_HASH_ROUTES", false),
+		CORSAllowedOrigins:   envOrigins("CORS_ALLOWED_ORIGINS"),
+		TrustProxyHeaders:    envBool("TRUST_PROXY_HEADERS", false),
+		TrustedProxyCIDRs:    trustedProxyCIDRs,
 		OffHourStart:         envInt("OFF_HOUR_START", 22),
 		OffHourEnd:           envInt("OFF_HOUR_END", 6),
 		AnomalyContamination: contamination,

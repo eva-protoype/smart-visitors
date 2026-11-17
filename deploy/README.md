@@ -54,6 +54,14 @@ APP_SCHEME=http
 APP_BASE_URL=https://visitors.yourdomain.com
 NEXT_PUBLIC_SAAS_URL=https://visitors.yourdomain.com
 
+# multi-origin static apps (GitHub Pages)
+CORS_ALLOWED_ORIGINS=https://project-dawnguard.github.io
+TRUST_PROXY_HEADERS=true
+TRUSTED_PROXY_CIDRS=172.16.0.0/12
+# leave empty until the visitor Pages app ships; defaults to APP_BASE_URL
+VISITOR_BASE_URL=
+VISITOR_HASH_ROUTES=false
+
 # tunnel
 CLOUDFLARE_TUNNEL_TOKEN=eyJhIjoi...
 
@@ -211,13 +219,17 @@ snapshots alone are not backups.
 
 All static sites live under the `project-DawnGuard` org on one origin:
 
-| Repo | URL |
-|---|---|
-| `project-DawnGuard.github.io` | `https://project-dawnguard.github.io/` (landing) |
-| `admin` | `https://project-dawnguard.github.io/admin/` |
-| `guard` | `https://project-dawnguard.github.io/guard/` |
-| `scanner` | `https://project-dawnguard.github.io/scanner/` |
-| `visitor` | `https://project-dawnguard.github.io/visitor/` |
+| Repo | URL | Role |
+|---|---|---|
+| `project-DawnGuard.github.io` | `https://project-dawnguard.github.io/` | admin console (landing page until P4) |
+| `guard` | `https://project-dawnguard.github.io/guard/` | guard console |
+| `scanner` | `https://project-dawnguard.github.io/scanner/` | host-side arrival verifier |
+| `visitor` | `https://project-dawnguard.github.io/visitor/` | invite + pass pages |
+| `admin` | `https://project-dawnguard.github.io/admin/` | temporary placeholder; retire after root cutover |
+| `landing` (planned) | `https://project-dawnguard.github.io/landing/` | landing page after P4 |
+
+There is no host dashboard: only admin sees visitor status. Hosts use the scanner app
+to verify arrivals.
 
 Provisioning:
 
@@ -230,17 +242,36 @@ deploy/github/sync-landing.sh
 ```
 
 `bootstrap-org.sh` is idempotent: it creates missing repos, enables Pages and skips
-anything that already exists. The four role repos currently serve placeholder pages;
-the static apps replace them in phases P1–P4 of
+anything that already exists. The role repos currently serve placeholder pages; the
+static apps replace them in phases P1–P4 of
 [`docs/github-pages-split-plan.md`](../docs/github-pages-split-plan.md).
 
 Notes:
 
 - The org root uses the legacy branch build; role sites use GitHub Actions
   (`site/index.html` + `.github/workflows/pages.yml` in each repo).
-- All four role paths share **one origin**, so CORS needs only
+- Every role path shares **one origin**, so CORS needs only
   `https://project-dawnguard.github.io`.
 - The landing page CTA points at the current quick-tunnel URL. Quick tunnels change on
   every restart — update `__LIVE_URL__`/the URL and re-run `sync-landing.sh`, or move to
   a named tunnel in §1.2.
 - This is showcase hosting only; the real app keeps running on the home PC.
+
+Verify the API accepts the Pages origin and rejects others:
+
+```bash
+# allowed: should return 204 with Access-Control-Allow-Origin
+curl -i -X OPTIONS https://YOUR-TUNNEL/api/auth/login \
+  -H 'Origin: https://project-dawnguard.github.io' \
+  -H 'Access-Control-Request-Method: POST'
+
+# unknown: should return 403 with no Access-Control-Allow-Origin
+curl -i -X OPTIONS https://YOUR-TUNNEL/api/auth/login \
+  -H 'Origin: https://evil.example' \
+  -H 'Access-Control-Request-Method: POST'
+```
+
+`TRUSTED_PROXY_CIDRS` must contain the Docker bridge subnet that Caddy uses, not the
+whole private range. Check it with `docker network inspect smart-visitors_public`.
+Wrong values make every request look like it came from the same IP, or let clients spoof
+their rate-limit key.

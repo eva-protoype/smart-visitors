@@ -193,7 +193,7 @@ func SelfEntryCreate(database *sql.DB, cfg config.Config) http.HandlerFunc {
 		writeJSON(w, http.StatusCreated, map[string]any{
 			"pass_id":     passID,
 			"status":      "active",
-			"visitor_url": strings.TrimRight(cfg.AppBaseURL, "/") + "/p/" + token,
+			"visitor_url": visitorPassURL(cfg, token),
 			"token":       "sv1:" + token,
 			"host_name":   hostName,
 			"valid_from":  input.ValidFrom,
