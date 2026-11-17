@@ -9,6 +9,8 @@ Two supported shapes:
 
 GitHub Pages **cannot** host this app (Next.js SSR, cookies, Go API, Postgres). It hosts stable entry links that redirect to the live home server.
 
+For a complete Windows 10/11 setup from scratch, see [`WINDOWS.md`](WINDOWS.md).
+
 ---
 
 ## 1. Home PC + Cloudflare Tunnel

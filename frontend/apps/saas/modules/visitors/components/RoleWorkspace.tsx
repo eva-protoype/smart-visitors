@@ -2,6 +2,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
+import { CameraQrScanner } from "./CameraQrScanner";
 import {
 	useCallback,
 	useEffect,
@@ -255,6 +256,7 @@ function GuardWorkspace() {
 	const [result, setResult] = useState<ScanResponse | null>(null);
 	const [loadingGates, setLoadingGates] = useState(true);
 	const [scanning, setScanning] = useState(false);
+	const [token, setToken] = useState("");
 
 	useEffect(() => {
 		let cancelled = false;
@@ -308,6 +310,7 @@ function GuardWorkspace() {
 			}
 			setResult(body);
 			form.reset();
+			setToken("");
 		} catch {
 			setError("The visitor service could not be reached.");
 		} finally {
@@ -325,11 +328,14 @@ function GuardWorkspace() {
 				<p className="mt-1 text-sm text-muted-foreground">
 					Enter or scan a visitor code to verify access.
 				</p>
+				<CameraQrScanner onDetected={setToken} />
 				<form className="mt-5 space-y-4" onSubmit={scan}>
 					<label className="block space-y-2 text-sm font-medium">
 						Pass code
 						<Input
 							name="token"
+							value={token}
+							onChange={(event) => setToken(event.target.value)}
 							autoComplete="off"
 							placeholder="sv1:…"
 							required

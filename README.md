@@ -33,6 +33,8 @@ Run the app with `docker compose up -d --build` and open
 - VM with prebuilt GHCR images: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build`
 - Full runbook (tunnel setup, HTTPS, backups, updates, GitHub Pages showcase):
   [`deploy/README.md`](deploy/README.md)
+- Windows from-scratch deployment:
+  [`deploy/WINDOWS.md`](deploy/WINDOWS.md)
 
 ### What is this, in one line?
 
