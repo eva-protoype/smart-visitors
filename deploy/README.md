@@ -207,30 +207,40 @@ snapshots alone are not backups.
 | `up` rebuilds every time | local build mode | use `docker-compose.prod.yml` + `--no-build` |
 | ml container OOM on 1 GB VM | sklearn sidecar | 2 GB RAM, or temporarily disable ml (also remove it from `api`'s `depends_on`) |
 
-## 7. GitHub Pages showcase
+## 7. GitHub Pages sites
 
-`deploy/github-pages/` is a static single-file landing page. Two ways to publish:
+All static sites live under the `project-DawnGuard` org on one origin:
 
-**A. Project Pages (works immediately in this repo)**
-1. Settings → Pages → Source: **GitHub Actions**
-2. Push to `main`; `.github/workflows/pages.yml` deploys the folder
-3. URL: `https://<owner>.github.io/smart-visitors/`
+| Repo | URL |
+|---|---|
+| `project-DawnGuard.github.io` | `https://project-dawnguard.github.io/` (landing) |
+| `admin` | `https://project-dawnguard.github.io/admin/` |
+| `guard` | `https://project-dawnguard.github.io/guard/` |
+| `scanner` | `https://project-dawnguard.github.io/scanner/` |
+| `visitor` | `https://project-dawnguard.github.io/visitor/` |
 
-**B. Exact `smart-visitors.github.io`**
-That hostname belongs to a GitHub **account or org named `smart-visitors`**. If you
-control it, create a repo named `smart-visitors.github.io` and push the contents of
-`deploy/github-pages/` as its root:
+Provisioning:
 
 ```bash
-cd deploy/github-pages
-git init -b main
-git add .
-git commit -m "Smart Visitors landing page"
-git remote add origin git@github.com:smart-visitors/smart-visitors.github.io.git
-git push -u origin main
+# one-time, after the org exists in the GitHub web UI
+deploy/github/bootstrap-org.sh
+
+# push the landing page after editing deploy/github-pages/index.html
+deploy/github/sync-landing.sh
 ```
 
-Then Settings → Pages → Deploy from branch → `main` / root.
+`bootstrap-org.sh` is idempotent: it creates missing repos, enables Pages and skips
+anything that already exists. The four role repos currently serve placeholder pages;
+the static apps replace them in phases P1–P4 of
+[`docs/github-pages-split-plan.md`](../docs/github-pages-split-plan.md).
 
-Before publishing, replace `__LIVE_URL__` in `index.html` with the tunnel URL.
-This page is only a showcase — the real app keeps running on the home PC.
+Notes:
+
+- The org root uses the legacy branch build; role sites use GitHub Actions
+  (`site/index.html` + `.github/workflows/pages.yml` in each repo).
+- All four role paths share **one origin**, so CORS needs only
+  `https://project-dawnguard.github.io`.
+- The landing page CTA points at the current quick-tunnel URL. Quick tunnels change on
+  every restart — update `__LIVE_URL__`/the URL and re-run `sync-landing.sh`, or move to
+  a named tunnel in §1.2.
+- This is showcase hosting only; the real app keeps running on the home PC.
