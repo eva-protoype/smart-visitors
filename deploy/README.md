@@ -97,6 +97,12 @@ Browser camera access for the guard console requires HTTPS — the tunnel provid
 
 ### 1.6 Quick demo URL (no domain)
 
+For the one-command demo, use [`../DEMO.md`](../DEMO.md) and `./setup.sh`. It
+creates/reuses a detached quick-tunnel container, updates `.env` automatically,
+and prints the four interface links.
+
+The lower-level manual option is:
+
 ```bash
 deploy/quick-tunnel.sh
 ```

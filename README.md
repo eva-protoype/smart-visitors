@@ -26,6 +26,19 @@ Caddyfile                 public reverse proxy
 Run the app with `docker compose up -d --build` and open
 `http://localhost:4000`.
 
+### Quick home-server demo
+
+For the free public demo setup used on the home PC, see [`DEMO.md`](DEMO.md).
+One command builds the stack, starts a Cloudflare quick tunnel, updates `.env`,
+and prints the four interface links:
+
+```bash
+./setup.sh
+```
+
+The quick tunnel needs no Cloudflare account or domain. Data stays in Docker
+volumes; stop with `./setup.sh --stop`.
+
 ### Deploying it
 
 - Home / college PC behind NAT: Cloudflare Tunnel overlay —
