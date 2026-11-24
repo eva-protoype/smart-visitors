@@ -1,7 +1,6 @@
 {
 	"dependencies": {
 		"@ai-sdk/react": "catalog:",
-		"@repo/i18n": "workspace:*",
 		"@aws-sdk/client-s3": "catalog:",
 		"@bprogress/next": "^3.2.12",
 		"@hookform/resolvers": "catalog:",
@@ -12,6 +11,7 @@
 		"@repo/api": "workspace:*",
 		"@repo/auth": "workspace:*",
 		"@repo/database": "workspace:*",
+		"@repo/i18n": "workspace:*",
 		"@repo/logs": "workspace:*",
 		"@repo/mail": "workspace:*",
 		"@repo/payments": "workspace:*",
@@ -32,6 +32,7 @@
 		"hono": "catalog:",
 		"input-otp": "catalog:",
 		"js-cookie": "catalog:",
+		"jsqr": "1.4.0",
 		"lucide-react": "catalog:",
 		"next": "catalog:",
 		"next-intl": "catalog:",
